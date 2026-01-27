@@ -1,36 +1,21 @@
-'use strict';
-const { Model } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
-  class Order extends Model {
-    static associate(models) {
-      Order.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-      Order.hasMany(models.OrderItem, { foreignKey: 'orderId', as: 'items' });
-    }
-  }
-  
-  Order.init({
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
+  const Order = sequelize.define('Order', {
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true
     },
-    status: {
-      type: DataTypes.ENUM('pending', 'paid', 'shipped', 'completed', 'cancelled'),
-      defaultValue: 'pending'
+    totalAmount: { type: DataTypes.INTEGER, allowNull: false },
+    status: { 
+      type: DataTypes.ENUM('PENDING', 'PAID', 'SHIPPED', 'CANCELLED', 'DELIVERED'),
+      defaultValue: 'PENDING'
     },
-    totalAmount: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    paymentProof: DataTypes.STRING,
-    shippingAddress: {
-      type: DataTypes.TEXT,
-      allowNull: false
-    },
-    trackingNumber: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Order',
+    shippingAddress: { type: DataTypes.TEXT, allowNull: false }, // Kolom ini yang tadi error
+    paymentMethod: { type: DataTypes.STRING, defaultValue: 'MANUAL_TRANSFER' }
   });
+
+  Order.associate = (models) => {
+    Order.belongsTo(models.User);
+    Order.hasMany(models.OrderItem, { as: 'items' });
+  };
   return Order;
 };

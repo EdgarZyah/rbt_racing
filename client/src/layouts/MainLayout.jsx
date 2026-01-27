@@ -1,15 +1,23 @@
+// client/src/layouts/MainLayout.jsx
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 
 export default function MainLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-bg">
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* Navbar tetap di atas */}
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        {/* Outlet adalah tempat halaman-halaman dirender */}
-        <Outlet />
+
+      {/* Konten Utama dengan transisi halus */}
+      <main className="flex-grow">
+        {/* Outlet akan merender HomePage, Product, dll */}
+        <div className="animate-in fade-in duration-700">
+          <Outlet />
+        </div>
       </main>
+
+      {/* Footer di bagian paling bawah */}
       <Footer />
     </div>
   );

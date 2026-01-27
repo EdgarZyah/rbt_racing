@@ -1,41 +1,34 @@
+// server/app.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const db = require('./models');
+const mainRouter = require('./routes'); 
 const path = require('path');
-const dotenv = require('dotenv');
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors()); // Agar client React bisa akses API
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static Folder untuk Gambar Produk
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static Folder untuk Akses Gambar WebP
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
-// Routes (Nanti kita import dari folder routes)
-// const productRoutes = require('./routes/productRoutes');
-// app.use('/api/products', productRoutes);
+// Routes
+app.use("/api/v1", mainRouter);
 
-// Base Route Check
-app.get('/', (req, res) => {
-  res.json({ message: 'RBT-Racing API is Running!' });
-});
-
-// Error Handling Middleware Global
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    status: 'error', 
-    message: 'Something went wrong!' 
+// Database Connection & Sync
+// Gunakan { alter: true } hanya saat pengembangan untuk update struktur tabel otomatis
+db.sequelize.sync({ alter: false }) 
+  .then(() => {
+    console.log("Database RBT Racing connected and synced.");
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Unable to connect to the database:", err);
   });
-});
-
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server launched in http://localhost:${PORT}`);
-});

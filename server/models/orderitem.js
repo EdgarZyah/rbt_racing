@@ -1,35 +1,13 @@
-'use strict';
-const { Model } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
-  class OrderItem extends Model {
-    static associate(models) {
-      OrderItem.belongsTo(models.Order, { foreignKey: 'orderId', as: 'order' });
-      OrderItem.belongsTo(models.Product, { foreignKey: 'productId', as: 'product' });
-    }
-  }
-  
-  OrderItem.init({
-    orderId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    productId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    quantity: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: { min: 1 }
-    },
-    priceAtPurchase: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    }
-  }, {
-    sequelize,
-    modelName: 'OrderItem',
+  const OrderItem = sequelize.define('OrderItem', {
+    quantity: { type: DataTypes.INTEGER, allowNull: false },
+    priceAtPurchase: { type: DataTypes.INTEGER, allowNull: false }, // Harga saat dibeli (bukan harga produk sekarang)
+    selectedVariants: { type: DataTypes.JSON } // Menyimpan pilihan Inlet, Finish, dll.
   });
+
+  OrderItem.associate = (models) => {
+    OrderItem.belongsTo(models.Order);
+    OrderItem.belongsTo(models.Product);
+  };
   return OrderItem;
 };

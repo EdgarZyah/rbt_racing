@@ -1,25 +1,18 @@
-'use strict';
-const { Model } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
-  class Category extends Model {
-    static associate(models) {
-      Category.hasMany(models.Product, { foreignKey: 'categoryId', as: 'products' });
+  const Category = sequelize.define('Category', {
+    name: { 
+      type: DataTypes.STRING, 
+      allowNull: false, 
+      unique: { msg: "Category name already exists" },
+      validate: {
+        notEmpty: { msg: "Category name cannot be empty" }
+      }
     }
-  }
-  
-  Category.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    slug: {
-      type: DataTypes.STRING,
-      unique: true
-    }
-  }, {
-    sequelize,
-    modelName: 'Category',
-  });
+  }, { timestamps: true });
+
+  Category.associate = (models) => {
+    // Relasi: Satu kategori bisa memiliki banyak produk
+    Category.hasMany(models.Product, { foreignKey: 'CategoryId' });
+  };
   return Category;
 };

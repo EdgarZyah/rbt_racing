@@ -1,50 +1,51 @@
+/* client/src/index.css */
 @import "tailwindcss";
-
-/* Menambahkan font Inter dari Google Fonts */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@plugin "tailwindcss-animate";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap");
 
 @theme {
-  --color-primary: #111827; /* Gray 900 - Hitam Pekat */
-  --color-secondary: #374151; /* Gray 700 - Abu Tua */
-  --color-accent: #d1d5db; /* Gray 300 - Abu Terang */
-  --color-paper: #f3f4f6; /* Gray 100 - Card Background */
-  --color-bg: #ffffff; /* White - Background Utama */
-
-  /* Background aplikasi (abu-abu sangat muda) */
-  --color-app-bg: theme(colors.zinc.50);
-  /* Background konten & sidebar (putih bersih) */
-  --color-content-bg: theme(colors.white);
-  --color-sidebar-bg: theme(colors.white);
-
-  /* Teks utama (hitam pekat) */
-  --color-text-main: theme(colors.zinc.900);
-  /* Teks sekunder (abu-abu gelap) */
-  --color-text-muted: theme(colors.zinc.600);
-  /* Teks placeholder/subtle (abu-abu muda) */
-  --color-text-subtle: theme(colors.zinc.400);
-
-  /* Border (abu-abu sangat muda) */
-  --color-border-main: theme(colors.zinc.200);
+  --color-primary: #000000; /* Hitam murni */
+  --color-secondary: #1a1a1a; /* Hitam lembut */
+  --color-accent: #71717a; /* Abu-abu zinc */
+  --color-bg: #ffffff; /* Putih bersih */
+  --color-muted: #f4f4f5; /* Abu-abu sangat muda untuk section */
+}
+@theme {
+  /* Pastikan variabel durasi tersedia jika ingin custom */
+  --animate-duration-1000: 1000ms;
 }
 
-html {
-  scroll-behavior: smooth;
+/* Utility agar elemen yang belum reveal benar-benar tersembunyi */
+.opacity-0 {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
 }
 
+/* Memastikan class animate-in mengoverride opacity-0 */
+.animate-in {
+  opacity: 1 !important;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% / 2));
+  }
+}
+
+.animate-infinite-scroll {
+  display: flex;
+  width: max-content;
+  animation: scroll 40s linear infinite;
+}
+
+.animate-infinite-scroll:hover {
+  animation-play-state: paused;
+}
 body {
-  @apply bg-app-bg text-text-main;
-  /* Menggunakan font Inter sebagai font utama */
-  font-family:
-    "Inter",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    "Noto Sans",
-    sans-serif;
+  @apply bg-bg text-primary;
+  font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }

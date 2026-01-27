@@ -1,38 +1,46 @@
-'use strict';
-const { Model } = require('sequelize');
-
+// server/models/product.js
 module.exports = (sequelize, DataTypes) => {
-  class Product extends Model {
-    static associate(models) {
-      Product.belongsTo(models.Category, { foreignKey: 'categoryId', as: 'category' });
-      Product.hasMany(models.OrderItem, { foreignKey: 'productId', as: 'orderItems' });
-    }
-  }
-  
-  Product.init({
+  const Product = sequelize.define('Product', {
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    description: DataTypes.TEXT,
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
     price: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: { min: 0 }
+      allowNull: false
     },
     stock: {
       type: DataTypes.INTEGER,
-      defaultValue: 0,
-      validate: { min: 0 }
-    },
-    imageUrl: DataTypes.STRING,
-    categoryId: {
-      type: DataTypes.INTEGER,
       allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    imageUrl: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    featured: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    // PENTING: Tipe TEXT untuk menyimpan JSON String array gambar
+    gallery: {
+      type: DataTypes.TEXT, 
+      allowNull: true
     }
-  }, {
-    sequelize,
-    modelName: 'Product',
   });
+
+  Product.associate = (models) => {
+    Product.belongsTo(models.Category);
+    Product.hasMany(models.ProductVariant, { as: 'variants', onDelete: 'CASCADE' });
+  };
+
   return Product;
 };
