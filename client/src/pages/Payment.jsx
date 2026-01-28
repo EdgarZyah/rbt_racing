@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useOrder } from '../hooks/useOrder';
 import { usePayment } from '../hooks/usePayment'; 
-import { useAuth } from '../context/AuthContext'; // Import useAuth
-import { CheckCircle, Loader2, Copy, ArrowLeft, ShieldCheck, QrCode, Upload, Image as ImageIcon, AlertCircle, Clock, ShieldAlert } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { CheckCircle, Loader2, Copy, ArrowLeft, ShieldCheck, QrCode, Upload, Image as ImageIcon, AlertCircle, Clock } from 'lucide-react';
+import ConfirmModal from '../components/commons/ConfirmModal';
 import qrisImage from '../assets/qris.png'; 
 
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth(); // Ambil status user
+  const { user } = useAuth();
   
   const { getOrderById } = useOrder();
   const { confirmPayment, uploading } = usePayment();
@@ -20,20 +21,58 @@ export default function Payment() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
+  // State untuk Modal & Countdown
+  const [timeLeft, setTimeLeft] = useState("");
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: "", message: "", type: "info" });
+
   const { orderId } = location.state || {};
 
-  // 1. Proteksi Akses: Cek Verifikasi Email
+  // 1. Proteksi Akses
   useEffect(() => {
     if (user && !user.isVerified) {
-      alert("Akses Ditolak. Harap verifikasi akun Anda terlebih dahulu.");
-      navigate('/cart');
+      navigate('/customer');
     }
   }, [user, navigate]);
 
-  // 2. Fetch Order Data
+  // 2. Logika Countdown Timer
+  const calculateTimeLeft = useCallback((createdAt) => {
+    const expirationTime = new Date(createdAt).getTime() + (24 * 60 * 60 * 1000); // +24 Jam
+    const now = new Date().getTime();
+    const difference = expirationTime - now;
+
+    if (difference <= 0) return "EXPIRED";
+
+    const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((difference / 1000 / 60) % 60);
+    const seconds = Math.floor((difference / 1000) % 60);
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }, []);
+
+  useEffect(() => {
+    if (!orderData) return;
+
+    const timer = setInterval(() => {
+      const time = calculateTimeLeft(orderData.createdAt);
+      setTimeLeft(time);
+      if (time === "EXPIRED") {
+        clearInterval(timer);
+        setModalConfig({
+          isOpen: true,
+          title: "Session Expired",
+          message: "Waktu pembayaran telah habis. Pesanan ini akan dibatalkan otomatis.",
+          type: "error"
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [orderData, calculateTimeLeft]);
+
+  // 3. Fetch Order Data
   useEffect(() => {
     if (!orderId) {
-      setErrorMsg("No Order ID found in navigation state.");
+      setErrorMsg("No Order ID found. Silakan kembali ke riwayat pesanan.");
       return;
     }
 
@@ -43,10 +82,10 @@ export default function Payment() {
         if (result.success) {
           setOrderData(result.data);
         } else {
-          setErrorMsg(result.message || "Failed to load order data.");
+          setErrorMsg(result.message);
         }
       } catch (err) {
-        setErrorMsg("Unexpected Error: " + err.message);
+        setErrorMsg("Gagal memuat data pembayaran.");
       } finally {
         setLoadingFetch(false);
       }
@@ -64,122 +103,154 @@ export default function Payment() {
   };
 
   const handleConfirmPayment = async () => {
-    if (!selectedFile) return alert("Please upload your payment proof first!");
+    if (!selectedFile) {
+      setModalConfig({
+        isOpen: true,
+        title: "Missing Proof",
+        message: "Harap unggah bukti pembayaran terlebih dahulu sebelum konfirmasi.",
+        type: "info"
+      });
+      return;
+    }
+
     const result = await confirmPayment(orderId, selectedFile);
     if (result.success) {
-      alert("Payment successful! Status updated to PAID.");
-      navigate('/customer/orders'); 
+      setModalConfig({
+        isOpen: true,
+        title: "Payment Transmitted",
+        message: "Bukti pembayaran berhasil dikirim. Admin akan segera melakukan verifikasi.",
+        type: "success"
+      });
     } else {
-      alert("Upload failed: " + result.message);
+      setModalConfig({
+        isOpen: true,
+        title: "Upload Failed",
+        message: result.message,
+        type: "error"
+      });
     }
   };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    alert(`Copied: ${text}`);
+    // Notification kecil bisa ditambahkan di sini jika perlu
   };
 
-  if (errorMsg) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center items-center gap-4">
-        <AlertCircle size={48} className="text-red-500" />
-        <h2 className="text-xl font-bold">Oops! Something went wrong</h2>
-        <p className="text-sm font-mono bg-red-50 p-4 rounded text-red-600 border border-red-200">{errorMsg}</p>
-        <Link to="/cart" className="bg-black text-white px-6 py-3 text-xs font-black uppercase tracking-widest rounded">Return to Cart</Link>
-      </div>
-    );
-  }
-
-  if (loadingFetch) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center items-center gap-4">
-        <Loader2 className="animate-spin text-zinc-300" size={32} />
-        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Loading Payment Details...</p>
-      </div>
-    );
-  }
-
-  if (!orderData) return null;
+  if (loadingFetch) return (
+    <div className="min-h-screen flex flex-col justify-center items-center">
+      <Loader2 className="animate-spin text-zinc-300 mb-4" size={40} />
+      <p className="text-[10px] font-black uppercase tracking-[0.3em]">Initializing Secure Payment...</p>
+    </div>
+  );
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-16 animate-in fade-in duration-500">
-      <div className="mb-8">
-        <Link to="/cart" className="text-zinc-400 hover:text-black flex items-center gap-2 mb-4 text-[10px] font-bold uppercase tracking-widest">
-          <ArrowLeft size={14}/> Back to Cart
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 lg:py-16 overflow-x-hidden">
+      
+      {/* HEADER SECTION */}
+      <div className="mb-10">
+        <Link to="/customer/orders" className="text-zinc-400 hover:text-black flex items-center gap-2 mb-6 text-[10px] font-black uppercase tracking-widest transition-colors">
+          <ArrowLeft size={14}/> Back to Orders
         </Link>
-        <div className="flex justify-between items-end">
-          <div>
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter">Complete Payment</h1>
-            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-2">
-              Order ID: <span className="text-black bg-zinc-100 px-2 py-1 rounded">{orderData.id}</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="text-left">
+            <h1 className="text-3xl lg:text-4xl font-black italic uppercase tracking-tighter leading-none">Checkout</h1>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mt-3">
+              REF: <span className="text-black">{orderData?.id}</span>
             </p>
           </div>
-          <div className="flex items-center gap-2 text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
-            <Clock size={14} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Waiting for Payment</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-8">
-        <div className="bg-zinc-50 border border-zinc-200 p-8 text-center rounded-lg relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-zinc-200 via-black to-zinc-200"></div>
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Total Amount to Pay</p>
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter">Rp {orderData.totalAmount.toLocaleString('id-ID')}</h2>
-            <button onClick={() => copyToClipboard(orderData.totalAmount)} className="p-2 hover:bg-zinc-200 rounded-full transition group">
-              <Copy size={18} className="text-zinc-400 group-hover:text-black"/>
-            </button>
-          </div>
-          <p className="text-[10px] text-red-500 font-bold uppercase bg-red-50 inline-block px-3 py-1 rounded-full border border-red-100">Please pay exact amount</p>
-        </div>
-
-        <div className="bg-white border border-zinc-200 shadow-xl rounded-xl overflow-hidden">
-          <div className="bg-black text-white p-4 text-center">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"><QrCode size={16}/> Scan QRIS</h3>
-          </div>
-          <div className="p-8 flex flex-col items-center">
-            <div className="p-4 bg-white border-2 border-dashed border-zinc-300 rounded-lg mb-6 relative group">
-              <img src={qrisImage} alt="QRIS" className="w-64 h-64 object-contain" />
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">RBT Racing Official</div>
+          
+          {/* COUNTDOWN BOX */}
+          <div className={`flex items-center gap-3 px-4 py-2 border rounded-sm shadow-sm ${timeLeft === "EXPIRED" ? 'bg-red-50 border-red-200 text-red-600' : 'bg-zinc-50 border-zinc-100 text-black'}`}>
+            <Clock size={16} className={timeLeft !== "EXPIRED" ? "animate-pulse" : ""} />
+            <div className="text-left">
+              <p className="text-[8px] font-black uppercase tracking-widest leading-none mb-1">Time Remaining</p>
+              <p className="text-sm font-black font-mono leading-none tracking-tighter">{timeLeft || "--:--:--"}</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg">
-           <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2"><Upload size={16}/> Upload Payment Proof</h3>
-           <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-zinc-300 rounded-lg cursor-pointer hover:bg-white hover:border-black transition-all relative overflow-hidden">
+      <div className="space-y-8">
+        {/* TOTAL AMOUNT BOX */}
+        <div className="bg-zinc-50 border border-zinc-200 p-8 text-center relative">
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">Total Payable Amount</p>
+          <div className="flex items-center justify-center gap-4">
+            <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">Rp {orderData?.totalAmount.toLocaleString('id-ID')}</h2>
+            <button onClick={() => copyToClipboard(orderData?.totalAmount)} className="p-2 hover:bg-zinc-200 transition-all active:scale-90">
+              <Copy size={20} className="text-zinc-400 hover:text-black"/>
+            </button>
+          </div>
+        </div>
+
+        {/* QRIS SECTION */}
+        <div className="border border-zinc-100 shadow-2xl rounded-sm overflow-hidden bg-white">
+          <div className="bg-black text-white p-4 text-center">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+              <QrCode size={14}/> Integrated QRIS Payment
+            </h3>
+          </div>
+          <div className="p-8 flex flex-col items-center bg-white">
+            <div className="p-4 border-2 border-dashed border-zinc-100 rounded-sm mb-6 bg-white shadow-inner">
+              <img src={qrisImage} alt="QRIS" className="w-64 h-64 md:w-80 md:h-80 object-contain" />
+            </div>
+            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 italic">Official Merchant: RBT Racing Team</p>
+          </div>
+        </div>
+
+        {/* UPLOAD SECTION */}
+        <div className="bg-zinc-50 border border-zinc-200 p-6">
+           <h3 className="text-[10px] font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+             <Upload size={14}/> Transmission Proof
+           </h3>
+           <label className="flex flex-col items-center justify-center w-full min-h-[200px] border-2 border-dashed border-zinc-300 bg-white cursor-pointer hover:border-black transition-all relative">
               {previewUrl ? (
-                <>
-                  <img src={previewUrl} alt="Proof" className="w-full h-full object-contain p-2" />
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-white text-xs font-bold uppercase">Change Image</span>
-                  </div>
-                </>
+                <img src={previewUrl} alt="Preview" className="w-full h-full max-h-[300px] object-contain p-4" />
               ) : (
-                <div className="flex flex-col items-center justify-center">
-                  <ImageIcon size={32} className="text-zinc-300 mb-2" />
-                  <p className="text-[10px] uppercase font-bold text-zinc-400">Click to upload image</p>
+                <div className="text-center">
+                  <ImageIcon size={32} className="text-zinc-200 mx-auto mb-3" />
+                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Attach Payment Screenshot</p>
                 </div>
               )}
               <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
            </label>
         </div>
 
-        <div className="space-y-4">
+        {/* ACTION BUTTON */}
+        <div className="pt-4">
           <button 
             onClick={handleConfirmPayment}
-            disabled={uploading || !selectedFile}
-            className="w-full bg-black text-white py-5 font-black uppercase tracking-[0.2em] hover:bg-zinc-800 transition disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg group"
+            disabled={uploading || !selectedFile || timeLeft === "EXPIRED"}
+            className="w-full bg-black text-white py-6 font-black uppercase tracking-[0.3em] text-[11px] hover:bg-zinc-800 transition-all disabled:opacity-30 flex items-center justify-center gap-4 shadow-xl active:scale-[0.99]"
           >
-            {uploading ? <><Loader2 className="animate-spin" size={18}/> Uploading...</> : <><CheckCircle size={18}/> Confirm Payment</>}
+            {uploading ? (
+              <><Loader2 className="animate-spin" size={16}/> Syncing Data...</>
+            ) : (
+              <><CheckCircle size={16}/> Finalize Transaction</>
+            )}
           </button>
-          <div className="flex items-center justify-center gap-2 text-zinc-400">
-            <ShieldCheck size={14}/>
-            <span className="text-[10px] font-bold uppercase tracking-widest">Secure Payment Gateway</span>
-          </div>
         </div>
       </div>
+
+      {/* MODAL UNTUK ALERT */}
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => {
+          setModalConfig({ ...modalConfig, isOpen: false });
+          if (modalConfig.type === "success" || modalConfig.type === "error" && timeLeft === "EXPIRED") {
+            navigate('/customer/orders');
+          }
+        }}
+        onConfirm={() => {
+          setModalConfig({ ...modalConfig, isOpen: false });
+          if (modalConfig.type === "success" || modalConfig.type === "error" && timeLeft === "EXPIRED") {
+            navigate('/customer/orders');
+          }
+        }}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText="Acknowledged"
+        showCancel={false}
+      />
     </div>
   );
 }

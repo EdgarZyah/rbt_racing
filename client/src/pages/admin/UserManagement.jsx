@@ -47,8 +47,8 @@ export default function UserManagement() {
   return (
     <div className="p-10 animate-in fade-in duration-700">
       <div className="mb-12">
-        <h1 className="text-4xl font-black italic tracking-tighter uppercase">Personnel</h1>
-        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mt-2">Manage RBT Racing access levels</p>
+        <h1 className="text-4xl font-black italic tracking-tighter uppercase">Account Management</h1>
+        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mt-2">Manage RBT Racing Accounts</p>
       </div>
 
       {loading ? (

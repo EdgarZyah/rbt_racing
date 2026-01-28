@@ -51,7 +51,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
-      <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <div className="w-full max-w-mdw-full duration-1000">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black italic tracking-tighter uppercase mb-2">Join RBT</h1>
           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.4em]">Engineered for the Elite</p>

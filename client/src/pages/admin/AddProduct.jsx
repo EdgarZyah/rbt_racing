@@ -21,7 +21,7 @@ export default function AddProduct() {
   };
 
   return (
-    <div className="p-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-10">
       <button onClick={() => navigate(-1)} className="flex items-center text-[10px] font-black uppercase text-zinc-400 hover:text-black mb-8 transition gap-2">
         <ChevronLeft size={14} /> Return to List
       </button>
