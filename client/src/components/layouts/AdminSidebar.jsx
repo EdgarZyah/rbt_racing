@@ -1,7 +1,7 @@
 // client/src/components/layouts/AdminSidebar.jsx
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Users, Layers, UserCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Layers, UserCircle, LogOut, Home } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext'; //
 import ConfirmModal from '../commons/ConfirmModal'; 
 import Notification from '../commons/Notification';
@@ -20,12 +20,13 @@ export default function AdminSidebar() {
   };
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Overview', path: '/admin' },
-    { icon: Package, label: 'Products', path: '/admin/products' },
-    { icon: Layers, label: 'Categories', path: '/admin/categories' },
-    { icon: ShoppingCart, label: 'Orders', path: '/admin/orders' },
-    { icon: Users, label: 'User Management', path: '/admin/users' },
-    { icon: UserCircle, label: 'Profile', path: '/admin/profile' },
+    { icon: LayoutDashboard, label: "Overview", path: "/admin" },
+    { icon: Package, label: "Products", path: "/admin/products" },
+    { icon: Layers, label: "Categories", path: "/admin/categories" },
+    { icon: UserCircle, label: "Profile", path: "/admin/profile" },
+    { icon: Home, label: "Shop Address", path: "/admin/shop-address" },
+    { icon: Users, label: "User Management", path: "/admin/users" },
+    { icon: ShoppingCart, label: "Orders", path: "/admin/orders" },
   ];
 
   return (

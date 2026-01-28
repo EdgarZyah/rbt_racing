@@ -1,10 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
   const OrderItem = sequelize.define('OrderItem', {
-    quantity: { type: DataTypes.INTEGER, allowNull: false },
-    priceAtPurchase: { type: DataTypes.INTEGER, allowNull: false }, // Harga saat dibeli (bukan harga produk sekarang)
-    selectedVariants: { type: DataTypes.JSON } // Menyimpan pilihan Inlet, Finish, dll.
-  });
-
+    quantity: DataTypes.INTEGER,
+    priceAtPurchase: DataTypes.INTEGER,
+    productSnapshot: DataTypes.TEXT // JSON String {name, image, sku, variant}
+  }, {});
+  
   OrderItem.associate = (models) => {
     OrderItem.belongsTo(models.Order);
     OrderItem.belongsTo(models.Product);

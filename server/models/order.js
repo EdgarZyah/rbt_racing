@@ -9,8 +9,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('PENDING', 'PAID', 'SHIPPED', 'CANCELLED', 'DELIVERED'),
       defaultValue: 'PENDING'
     },
-    shippingAddress: { type: DataTypes.TEXT, allowNull: false }, // Kolom ini yang tadi error
-    paymentMethod: { type: DataTypes.STRING, defaultValue: 'MANUAL_TRANSFER' }
+    paymentMethod: { type: DataTypes.STRING, defaultValue: 'MANUAL_TRANSFER' },
+    
+    // DETAIL PENGIRIMAN
+    shippingAddress: { type: DataTypes.TEXT, allowNull: false }, 
+    shippingCost: { type: DataTypes.INTEGER, defaultValue: 0 },
+    shippingService: { type: DataTypes.STRING }, 
+    resi: { type: DataTypes.STRING, allowNull: true },
+
+    // TAMBAHAN: BUKTI BAYAR
+    paymentProof: { type: DataTypes.STRING, allowNull: true } 
   });
 
   Order.associate = (models) => {

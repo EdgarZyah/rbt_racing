@@ -1,141 +1,237 @@
-import React, { useEffect, useState } from 'react';
-import { X, User, MapPin, CreditCard, Package, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Package, MapPin, CreditCard, User, Calendar, Image as ImageIcon, Loader2, Truck, Download, Save, ExternalLink } from 'lucide-react';
 import { useOrder } from '../../hooks/useOrder';
 
 export default function OrderDetailModal({ isOpen, onClose, orderId }) {
-  const { getOrderById } = useOrder();
+  const { getOrderById, updateResi } = useOrder(); // Tambahkan updateResi
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  // State untuk Input Resi
+  const [resiInput, setResiInput] = useState('');
+  const [submittingResi, setSubmittingResi] = useState(false);
 
   useEffect(() => {
     if (isOpen && orderId) {
-      const fetchDetail = async () => {
-        setLoading(true);
-        const data = await getOrderById(orderId);
-        setOrder(data);
+      setLoading(true);
+      getOrderById(orderId).then((result) => {
+        if (result.success) {
+          setOrder(result.data);
+          // Set resi awal jika sudah ada
+          if (result.data.resi) setResiInput(result.data.resi);
+        } else {
+          setOrder(null);
+        }
         setLoading(false);
-      };
-      fetchDetail();
+      });
+    } else {
+      setOrder(null);
+      setResiInput('');
     }
   }, [isOpen, orderId, getOrderById]);
 
+  // Handler Simpan Resi
+  const handleSaveResi = async () => {
+    if (!resiInput.trim()) return alert("Resi number cannot be empty");
+    
+    setSubmittingResi(true);
+    const result = await updateResi(orderId, resiInput);
+    setSubmittingResi(false);
+
+    if (result.success) {
+      alert("Order updated to SHIPPED successfully!");
+      // Refresh data order lokal
+      setOrder(prev => ({ ...prev, status: 'SHIPPED', resi: resiInput }));
+    } else {
+      alert("Failed: " + result.message);
+    }
+  };
+
+  // Helper Download Gambar
+  const handleDownloadImage = async (imageUrl, fileName) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName || 'download.webp';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Download failed", error);
+    }
+  };
+
   if (!isOpen) return null;
 
+  const parseData = (data) => {
+    try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return {}; }
+  };
+
+  const BASE_URL = 'http://localhost:3000'; 
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} />
-      
-      {/* Modal Container */}
-      <div className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl rounded-lg flex flex-col">
         
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-zinc-100 p-6 md:p-8 flex justify-between items-center z-10">
+        {/* HEADER */}
+        <div className="p-6 border-b border-zinc-100 flex justify-between items-center sticky top-0 bg-white z-10">
           <div>
-            <h2 className="text-2xl font-black italic tracking-tighter uppercase">Transaction Receipt</h2>
+            <h2 className="text-xl font-black italic uppercase tracking-tighter">Order Details</h2>
             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">ID: {orderId}</p>
           </div>
-          <button onClick={onClose} className="text-zinc-300 hover:text-black transition">
-            <X size={24} />
-          </button>
+          <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition"><X size={20} /></button>
         </div>
 
-        {loading ? (
-          <div className="py-32 flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="animate-spin text-zinc-200" size={40} />
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Retrieving Data...</p>
-          </div>
-        ) : order && (
-          <div className="p-6 md:p-8 space-y-12">
-            
-            {/* Grid 1: Customer & Logistics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {/* Customer Info */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2 text-zinc-300">
-                  <User size={14} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">Client Identity</span>
+        {/* CONTENT */}
+        <div className="p-8">
+          {loading ? (
+            <div className="py-20 flex flex-col items-center justify-center gap-4 text-zinc-300">
+              <Loader2 className="animate-spin" size={32} />
+              <span className="text-xs font-bold uppercase tracking-widest">Loading Data...</span>
+            </div>
+          ) : order ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              {/* KOLOM KIRI: INFO UTAMA */}
+              <div className="lg:col-span-2 space-y-8">
+                
+                {/* STATUS BAR */}
+                <div className="flex items-center justify-between bg-zinc-50 p-4 border border-zinc-100">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white p-2 border border-zinc-200"><Calendar size={16} /></div>
+                    <div>
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Order Date</p>
+                      <p className="text-xs font-black uppercase">{new Date(order.createdAt).toLocaleString('id-ID')}</p>
+                    </div>
+                  </div>
+                  <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest border ${
+                    order.status === 'PAID' ? 'bg-black text-white border-black' : 
+                    order.status === 'SHIPPED' ? 'bg-blue-600 text-white border-blue-600' :
+                    'bg-white text-zinc-400 border-zinc-200'
+                  }`}>
+                    {order.status}
+                  </span>
                 </div>
-                <div className="bg-zinc-50 p-6 border border-zinc-100">
-                  <p className="text-lg font-black italic uppercase tracking-tight">{order.User?.username}</p>
-                  <p className="text-[11px] font-bold text-zinc-400 mt-1">{order.User?.email}</p>
-                </div>
-              </div>
 
-              {/* Shipping & Payment */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2 text-zinc-300">
-                  <MapPin size={14} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">Logistic Destination</span>
-                </div>
-                <div className="bg-zinc-50 p-6 border border-zinc-100">
-                  <p className="text-[10px] font-bold uppercase leading-relaxed">{order.shippingAddress || 'No Address Provided'}</p>
-                  <div className="mt-4 pt-4 border-t border-zinc-200 flex items-center justify-between">
-                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Method</span>
-                    <span className="text-[10px] font-black uppercase italic italic flex items-center gap-2">
-                      <CreditCard size={12} /> {order.paymentMethod}
-                    </span>
+                {/* AREA ADMIN: INPUT RESI (Hanya muncul jika PAID atau SHIPPED) */}
+                {(order.status === 'PAID' || order.status === 'SHIPPED') && (
+                  <div className="bg-blue-50 border border-blue-100 p-6 rounded-lg">
+                    <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2 text-blue-700">
+                      <Truck size={16}/> Shipping Management
+                    </h3>
+                    <div className="flex gap-3 items-end">
+                      <div className="flex-1">
+                        <label className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-1 block">Tracking Number (Resi)</label>
+                        <input 
+                          type="text" 
+                          value={resiInput}
+                          onChange={(e) => setResiInput(e.target.value)}
+                          placeholder="Input JNE/JNT Resi..."
+                          className="w-full p-3 text-sm font-bold border border-blue-200 rounded focus:outline-none focus:border-blue-500 uppercase"
+                        />
+                      </div>
+                      <button 
+                        onClick={handleSaveResi}
+                        disabled={submittingResi}
+                        className="bg-blue-600 text-white px-6 py-3 rounded font-bold text-xs uppercase tracking-widest hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {submittingResi ? <Loader2 className="animate-spin" size={14}/> : <Save size={14}/>}
+                        {order.status === 'SHIPPED' ? 'Update' : 'Ship'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ITEMS */}
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2"><Package size={14}/> Items</h3>
+                  <div className="border border-zinc-100 divide-y divide-zinc-50">
+                    {order.items?.map((item) => {
+                      const snapshot = parseData(item.productSnapshot);
+                      return (
+                        <div key={item.id} className="p-4 flex gap-4">
+                          <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 flex-shrink-0">
+                            {snapshot.image && <img src={`${BASE_URL}${snapshot.image}`} className="w-full h-full object-cover"/>}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-black uppercase">{snapshot.name}</p>
+                            <p className="text-[10px] text-zinc-400">Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+
+                {/* ADDRESS INFO */}
+                <div className="bg-zinc-50 p-4 border border-zinc-100">
+                  <h4 className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-3 flex items-center gap-2"><MapPin size={12}/> Shipping Address</h4>
+                  {(() => {
+                    const addr = parseData(order.shippingAddress);
+                    return (
+                      <>
+                        <p className="text-xs font-black uppercase">{addr.receiverName}</p>
+                        <p className="text-[10px] text-zinc-500 mt-1">{addr.fullAddress}, {addr.city}</p>
+                        <p className="text-[10px] font-bold mt-2 text-zinc-400">Phone: {addr.phoneNumber}</p>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* KOLOM KANAN */}
+              <div className="space-y-8">
+                
+                {/* BUKTI BAYAR + DOWNLOAD */}
+                <div className="border border-zinc-200 p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2"><CreditCard size={14}/> Payment Proof</h3>
+                    {order.paymentProof && (
+                      <button 
+                        onClick={() => handleDownloadImage(`${BASE_URL}/uploads/${order.paymentProof}`, `proof-${orderId}.webp`)}
+                        className="text-[9px] font-bold bg-zinc-100 px-2 py-1 flex items-center gap-1 hover:bg-black hover:text-white transition"
+                      >
+                        <Download size={10}/> Save
+                      </button>
+                    )}
+                  </div>
+                  
+                  {order.paymentProof ? (
+                    <div className="relative group border border-zinc-100 bg-zinc-50 aspect-[3/4]">
+                      <img 
+                        src={`${BASE_URL}/uploads/${order.paymentProof}`} 
+                        alt="Bukti Bayar" 
+                        className="w-full h-full object-contain cursor-zoom-in"
+                        onClick={() => window.open(`${BASE_URL}/uploads/${order.paymentProof}`, '_blank')}
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-zinc-50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-zinc-400">
+                      <ImageIcon size={24} className="mb-2 opacity-50"/>
+                      <span className="text-[9px] font-bold uppercase tracking-widest">No Proof Uploaded</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* SUMMARY */}
+                <div className="bg-zinc-900 text-white p-6">
+                  <h3 className="text-xs font-black uppercase tracking-widest mb-6 border-b border-zinc-800 pb-2">Summary</h3>
+                  <div className="space-y-3 text-xs mb-6">
+                    <div className="flex justify-between text-zinc-400"><span>Shipping</span><span>Rp {order.shippingCost?.toLocaleString('id-ID')}</span></div>
+                  </div>
+                  <div className="flex justify-between items-end border-t border-zinc-800 pt-4">
+                    <span className="text-xs font-bold uppercase text-zinc-400">Total</span>
+                    <span className="text-xl font-black italic tracking-tighter">Rp {order.totalAmount.toLocaleString('id-ID')}</span>
+                  </div>
+                </div>
+
               </div>
             </div>
-
-            {/* Grid 2: Items Table */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 text-zinc-300">
-                <Package size={14} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Manifest Items</span>
-              </div>
-              <div className="border border-zinc-100">
-                <table className="w-full text-left">
-                  <thead className="bg-zinc-50 text-[9px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100">
-                    <tr>
-                      <th className="px-6 py-4">Component</th>
-                      <th className="px-6 py-4 text-center">Qty</th>
-                      <th className="px-6 py-4 text-right">Unit Price</th>
-                      <th className="px-6 py-4 text-right">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-50">
-                    {order.items?.map((item, idx) => (
-                      <tr key={idx} className="text-[11px]">
-                        <td className="px-6 py-4 flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-zinc-100 border border-zinc-100 grayscale shrink-0">
-                            {item.Product?.imageUrl && (
-                              <img src={`http://localhost:3000${item.Product.imageUrl}`} className="w-full h-full object-cover" alt="" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-black uppercase italic">{item.Product?.name}</p>
-                            <p className="text-[9px] text-zinc-400 font-bold uppercase mt-1">
-                              {item.selectedVariants ? Object.entries(JSON.parse(item.selectedVariants)).map(([k, v]) => `${k}: ${v}`).join(' | ') : '-'}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center font-bold">{item.quantity}</td>
-                        <td className="px-6 py-4 text-right font-bold text-zinc-400">Rp {item.priceAtPurchase?.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right font-black">Rp {(item.priceAtPurchase * item.quantity).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Footer Summary */}
-            <div className="bg-black text-white p-8 flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="text-center md:text-left">
-                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500 mb-1">Transaction Status</p>
-                <p className="text-xl font-black italic tracking-tighter uppercase">{order.status}</p>
-              </div>
-              <div className="text-center md:text-right">
-                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500 mb-1">Grand Total</p>
-                <p className="text-4xl font-black italic tracking-tighter">Rp {order.totalAmount?.toLocaleString('id-ID')}</p>
-              </div>
-            </div>
-
-          </div>
-        )}
+          ) : <div className="text-center py-20 text-zinc-400">Failed to load data.</div>}
+        </div>
       </div>
     </div>
   );

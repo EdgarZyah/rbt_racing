@@ -9,6 +9,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("ADMIN", "CUSTOMER"),
         defaultValue: "CUSTOMER",
       },
+      isVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      verificationToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      verificationTokenExpires: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
     { timestamps: true },
   );

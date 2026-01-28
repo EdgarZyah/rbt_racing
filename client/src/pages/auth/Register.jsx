@@ -1,16 +1,15 @@
-// client/src/pages/auth/Register.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, Lock, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, MailCheck } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false); // State baru untuk alur tampilan
   
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,12 +19,35 @@ export default function Register() {
     const result = await register(formData.username, formData.email, formData.password);
     
     if (result.success) {
-      navigate('/login');
+      setIsRegistered(true); // Ubah tampilan ke instruksi cek email
     } else {
       setError(result.message);
       setIsSubmitting(false);
     }
   };
+
+  // Tampilan Instruksi Cek Email setelah sukses Register
+  if (isRegistered) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="w-full max-w-md text-center animate-in fade-in zoom-in duration-700">
+          <div className="flex justify-center mb-8">
+            <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center border border-zinc-100">
+              <MailCheck size={32} className="text-black" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-4">Check Your Inbox</h1>
+          <p className="text-[11px] font-medium leading-relaxed text-zinc-500 uppercase tracking-widest mb-10">
+            We have sent a verification link to <span className="text-black font-bold">{formData.email}</span>. <br /> 
+            Please click the link to activate your RBT_RACING account.
+          </p>
+          <Link to="/login" className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-black transition-colors">
+            Back to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">

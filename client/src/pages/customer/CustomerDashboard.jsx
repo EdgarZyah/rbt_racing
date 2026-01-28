@@ -1,39 +1,75 @@
-import React from 'react';
-import { ShoppingBag, MapPin, User, ArrowRight, Package } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingBag, User, ArrowRight, MailWarning, Loader2, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Table from '../../components/commons/Table';
+import { useAuth } from '../../context/AuthContext';
+import ConfirmModal from '../../components/commons/ConfirmModal';
 
 export default function CustomerDashboard() {
-  const recentOrders = [
-    { id: "ORD-1029", date: "2026-01-26", total: 2500000, status: "SHIPPED" },
-  ];
+  const { user, resendVerification } = useAuth();
+  const [isResending, setIsResending] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
-  const headers = ["Order ID", "Date", "Total", "Status", "Action"];
+  const handleResendLink = async () => {
+    // Pastikan email user ada di state
+    const userEmail = user?.email;
 
-  const renderRow = (order) => (
-    <tr key={order.id} className="border-b border-zinc-50 hover:bg-zinc-50 transition">
-      <td className="px-6 py-4 font-black text-[10px] tracking-tighter">{order.id}</td>
-      <td className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase">{order.date}</td>
-      <td className="px-6 py-4 text-[10px] font-black italic">Rp {order.total.toLocaleString()}</td>
-      <td className="px-6 py-4">
-        <span className="text-[9px] font-black uppercase px-2 py-0.5 border border-black bg-black text-white">
-          {order.status}
-        </span>
-      </td>
-      <td className="px-6 py-4">
-        <Link to={`/customer/orders`} className="text-[10px] font-black uppercase border-b border-black">Detail</Link>
-      </td>
-    </tr>
-  );
+    if (!userEmail) {
+      alert("Sesi tidak ditemukan. Harap login ulang.");
+      return;
+    }
+
+    setIsResending(true);
+    // Mengirim email user ke fungsi resendVerification di AuthContext
+    const result = await resendVerification(userEmail); 
+    
+    if (result.success) {
+      setShowInfoModal(true);
+    } else {
+      alert(result.message);
+    }
+    setIsResending(false);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 animate-in fade-in duration-700">
+      
+      {/* 1. BANNER PERINGATAN VERIFIKASI */}
+      {user && !user.isVerified && (
+        <div className="mb-12 bg-black text-white p-6 border-l-4 border-red-600 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <MailWarning className="text-red-600" size={24} />
+            <div>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] mb-1">Aktivasi Diperlukan</h3>
+              <p className="text-[10px] text-zinc-400 uppercase tracking-widest leading-relaxed">
+                Email <strong>{user.email}</strong> belum diverifikasi. Verifikasi akun untuk membuka fitur penuh.
+              </p>
+            </div>
+          </div>
+          
+          <button 
+            onClick={handleResendLink}
+            disabled={isResending}
+            className="group bg-white text-black px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-zinc-200 transition-all disabled:opacity-50"
+          >
+            {isResending ? (
+              <> <Loader2 size={14} className="animate-spin" /> Transmitting... </>
+            ) : (
+              <> Resend Verification Link <ArrowRight size={14} /> </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* 2. HEADER */}
       <div className="mb-12">
         <h1 className="text-4xl font-black italic tracking-tighter uppercase">My Account</h1>
-        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">Welcome back, Performance Enthusiast</p>
+        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">
+          Welcome back, {user?.email?.split('@')[0]}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      {/* 3. MENU DASHBOARD */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
         <Link to="/customer/orders" className="border border-zinc-100 p-8 hover:bg-zinc-50 transition group">
           <ShoppingBag size={24} className="mb-6 text-zinc-300 group-hover:text-black transition" />
           <h3 className="text-xs font-black uppercase tracking-widest mb-1">Orders</h3>
@@ -44,20 +80,26 @@ export default function CustomerDashboard() {
           <h3 className="text-xs font-black uppercase tracking-widest mb-1">Profile</h3>
           <p className="text-[10px] text-zinc-400 uppercase">Edit your personal info</p>
         </Link>
-        <div className="border border-zinc-100 p-8 bg-black text-white">
-          <Package size={24} className="mb-6 text-zinc-500" />
-          <h3 className="text-xs font-black uppercase tracking-widest mb-1 text-white">RBT_Points</h3>
-          <p className="text-[10px] text-zinc-400 uppercase">You have 1,250 points</p>
-        </div>
       </div>
 
-      <div className="space-y-8">
-        <div className="flex justify-between items-end">
-          <h2 className="text-lg font-black italic uppercase tracking-tighter">Recent Orders</h2>
-          <Link to="/customer/orders" className="text-[10px] font-black uppercase tracking-widest border-b-2 border-black">View All</Link>
-        </div>
-        <Table headers={headers} data={recentOrders} renderRow={renderRow} />
-      </div>
+      {/* 4. MODAL INFORMASI SUKSES */}
+      <ConfirmModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title="Email Transmitted"
+        message={
+          <div className="text-center py-4">
+            <CheckCircle size={48} className="text-green-500 mx-auto mb-4" />
+            <p className="text-xs font-bold uppercase mb-2 tracking-widest">Link Berhasil Dikirim</p>
+            <p className="text-[10px] text-zinc-500 uppercase leading-relaxed">
+              Instruksi aktivasi baru telah dikirim ke <br /> <strong>{user?.email}</strong>. 
+            </p>
+          </div>
+        }
+        confirmText="Acknowledged"
+        showCancel={false}
+        onConfirm={() => setShowInfoModal(false)}
+      />
     </div>
   );
 }

@@ -14,21 +14,35 @@ class AddressController {
     }
   }
 
-  // Tambah alamat baru
+  // Tambah alamat baru (DIPERBARUI)
   static async addAddress(req, res) {
     try {
-      const { isMain } = req.body;
+      // Ambil semua field termasuk district & subDistrict
+      const { 
+        isMain, 
+        provinceId, cityId, districtId, subDistrictId, 
+        province, city, district, subDistrict, 
+        receiverName, phoneNumber, postalCode, fullAddress 
+      } = req.body;
+      
       if (isMain) {
         await Address.update({ isMain: false }, { where: { UserId: req.user.id } });
       }
-      const address = await Address.create({ ...req.body, UserId: req.user.id });
+      
+      const address = await Address.create({ 
+        receiverName, phoneNumber, postalCode, fullAddress, isMain,
+        provinceId, cityId, districtId, subDistrictId,
+        province, city, district, subDistrict,
+        UserId: req.user.id 
+      });
       res.status(201).json(address);
     } catch (error) {
+      console.error(error);
       res.status(400).json({ message: error.message });
     }
   }
 
-  // --- FUNGSI YANG DIPERLUKAN BARIS 14 ---
+  // Update alamat (DIPERBARUI)
   static async updateAddress(req, res) {
     try {
       const { id } = req.params;
@@ -40,6 +54,7 @@ class AddressController {
         await Address.update({ isMain: false }, { where: { UserId: req.user.id } });
       }
 
+      // Sequelize akan otomatis mencocokkan field di req.body dengan model
       await address.update(req.body);
       res.status(200).json({ message: "Alamat berhasil diperbarui", data: address });
     } catch (error) {

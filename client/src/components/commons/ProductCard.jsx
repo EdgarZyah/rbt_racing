@@ -1,7 +1,7 @@
 // client/src/components/ProductCard.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 export default function ProductCard({ product }) {
   const [ref, isVisible] = useScrollReveal();

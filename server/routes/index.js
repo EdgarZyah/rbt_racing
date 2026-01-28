@@ -7,12 +7,16 @@ const categoryRoutes = require("./categoryRoutes");
 const orderRoutes = require("./orderRoutes");
 const addressRoutes = require("./addressRoutes");
 const userRoutes = require("./userRoutes");
-
+const rajaOngkirRoutes = require("./rajaOngkirRoutes");
+const shopAddressRoutes = require("./shopAddressRoutes");
+const cartRoutes = require('./cartRoutes');
 router.use("/users", userRoutes);
 router.use("/auth", authRoutes);
 router.use("/products", productRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/orders", orderRoutes);
 router.use("/addresses", addressRoutes);
-
+router.use("/rajaongkir", rajaOngkirRoutes);
+router.use("/shop-address", shopAddressRoutes);
+router.use('/cart', cartRoutes);
 module.exports = router;

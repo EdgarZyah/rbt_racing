@@ -1,9 +1,8 @@
-// client/src/pages/admin/OrderList.jsx
 import React, { useState, useEffect } from 'react';
 import Table from '../../components/commons/Table';
 import { Eye, FileText, Search, Loader2 } from 'lucide-react';
 import { useOrder } from '../../hooks/useOrder';
-import OrderDetailModal from '../../components/admin/OrderDetailModal'; // Pastikan file modal sudah dibuat
+import OrderDetailModal from '../../components/admin/OrderDetailModal'; 
 
 export default function OrderList() {
   const { orders, loading, getOrders } = useOrder();
@@ -23,9 +22,9 @@ export default function OrderList() {
   const filteredOrders = orders.filter(order => {
     const matchesStatus = currentStatus === 'ALL' || order.status === currentStatus;
     
-    // Gunakan String() untuk membungkus id agar toLowerCase tidak error
     const orderId = order.id ? String(order.id).toLowerCase() : "";
-    const username = order.User?.username ? String(order.User.username).toLowerCase() : "";
+    // Mengakses username dari relasi User (pastikan backend mengirim include: [User])
+    const username = order.User?.username ? String(order.User.username).toLowerCase() : "Guest";
     const query = searchQuery.toLowerCase();
 
     const matchesSearch = orderId.includes(query) || username.includes(query);
@@ -43,8 +42,9 @@ export default function OrderList() {
       <td className="px-6 py-5 font-black text-[11px] tracking-tighter">{order.id}</td>
       <td className="px-6 py-5">
         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">
-          {order.User?.username || 'GUEST'}
+          {order.User?.username || 'UNKNOWN'}
         </p>
+        <p className="text-[9px] text-zinc-400">{order.User?.email}</p>
       </td>
       <td className="px-6 py-5 text-[10px] font-bold text-zinc-400 uppercase">
         {order.createdAt ? new Date(order.createdAt).toLocaleDateString('id-ID') : '-'}
@@ -54,24 +54,22 @@ export default function OrderList() {
       </td>
       <td className="px-6 py-5">
         <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest italic border ${
-          order.status === 'PAID' ? 'bg-zinc-900 text-white border-black' :
-          order.status === 'PENDING' ? 'bg-white text-zinc-400 border-zinc-200' :
-          'bg-zinc-100 text-zinc-400 border-transparent'
+          order.status === 'PAID' ? 'bg-black text-white border-black' :
+          order.status === 'SHIPPED' ? 'bg-blue-600 text-white border-blue-600' :
+          order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+          'bg-red-50 text-red-500 border-red-100'
         }`}>
           {order.status}
         </span>
       </td>
       <td className="px-6 py-5">
         <div className="flex space-x-3">
-          {/* Tombol Eye sekarang memicu modal detail */}
           <button 
             onClick={() => handleOpenDetail(order.id)}
             className="text-zinc-400 hover:text-black transition"
+            title="View Details"
           >
             <Eye size={16} strokeWidth={1.5} />
-          </button>
-          <button className="text-zinc-400 hover:text-black transition">
-            <FileText size={16} strokeWidth={1.5} />
           </button>
         </div>
       </td>
@@ -83,14 +81,14 @@ export default function OrderList() {
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
           <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Transactions</h1>
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mt-3">Monitor and manage racing equipment orders</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mt-3">Monitor and manage orders</p>
         </div>
         
         <div className="relative w-full md:w-72">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300" size={14} />
           <input 
             type="text" 
-            placeholder="FIND ORDER..." 
+            placeholder="ORDER ID / CUSTOMER..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-zinc-50 border border-zinc-200 py-3 pl-10 pr-4 text-[9px] font-black tracking-widest uppercase focus:border-black outline-none transition"
@@ -99,7 +97,7 @@ export default function OrderList() {
       </div>
 
       <div className="flex space-x-8 mb-8 border-b border-zinc-100">
-        {['ALL', 'PENDING', 'PAID', 'CANCELLED'].map((status) => (
+        {['ALL', 'PENDING', 'PAID', 'SHIPPED', 'CANCELLED'].map((status) => (
           <button
             key={status}
             onClick={() => setCurrentStatus(status)}
@@ -127,7 +125,7 @@ export default function OrderList() {
         />
       )}
 
-      {/* Komponen Modal Rincian Pesanan */}
+      {/* Modal Detail untuk Admin (Pastikan component ini ada) */}
       <OrderDetailModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

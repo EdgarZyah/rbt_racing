@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Search, Loader2, Star } from 'lucide-react';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/commons/ProductCard';
 import { useProduct } from '../hooks/useProduct';
 import { useCategory } from '../hooks/useCategory'; // Import useCategory
 
