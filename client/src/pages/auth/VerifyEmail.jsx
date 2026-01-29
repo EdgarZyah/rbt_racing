@@ -64,7 +64,7 @@ export default function VerifyEmail() {
         {status === 'loading' && (
           <div className="py-10">
             <Loader2 className="animate-spin mx-auto mb-4 text-zinc-300" size={40} />
-            <h1 className="text-xl font-black italic uppercase tracking-tighter">Verifying Engine...</h1>
+            <h1 className="text-xl font-black italic uppercase tracking-tighter">Verifying...</h1>
           </div>
         )}
 

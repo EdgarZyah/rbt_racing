@@ -106,7 +106,7 @@ export default function Register() {
             {isSubmitting ? (
               <><Loader2 className="animate-spin" size={14}/> <span>SYNCING...</span></>
             ) : (
-              <><span>ESTABLISH ACCOUNT</span> <ArrowRight size={14} /></>
+              <><span>CREATE ACCOUNT</span> <ArrowRight size={14} /></>
             )}
           </button>
         </form>

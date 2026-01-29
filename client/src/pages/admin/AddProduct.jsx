@@ -25,7 +25,7 @@ export default function AddProduct() {
       <button onClick={() => navigate(-1)} className="flex items-center text-[10px] font-black uppercase text-zinc-400 hover:text-black mb-8 transition gap-2">
         <ChevronLeft size={14} /> Return to List
       </button>
-      <h1 className="text-4xl font-black italic uppercase mb-12">Initialize Hardware</h1>
+      <h1 className="text-4xl font-black italic uppercase mb-12">Initialize Product</h1>
       <ProductForm onSubmit={handleSubmit} isLoading={loading} />
       <Notification {...notif} onClose={() => setNotif({ ...notif, show: false })} />
     </div>
