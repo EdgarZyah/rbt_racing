@@ -8,6 +8,7 @@ import {
 import { useOrder } from '../../hooks/useOrder';
 import ConfirmModal from '../commons/ConfirmModal';
 import Notification from '../commons/Notification';
+import { APP_BASE_URL } from '../../api/axios';
 
 export default function OrderDetailModal({ isOpen, onClose, orderId }) {
   const { getOrderById, updateResi } = useOrder();
@@ -66,7 +67,7 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
 
   if (!isOpen) return null;
   const parseData = (data) => { try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return {}; } };
-  const BASE_URL = 'http://localhost:3000'; 
+  const BASE_URL = APP_BASE_URL;
   const isAlreadyShipped = order?.status === 'SHIPPED';
 
   return (

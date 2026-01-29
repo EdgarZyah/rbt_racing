@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
+import { APP_BASE_URL } from '../../api/axios';
 
 export default function ProductCard({ product }) {
   const [ref, isVisible] = useScrollReveal();
@@ -18,7 +19,7 @@ export default function ProductCard({ product }) {
       <div className="aspect-square w-full overflow-hidden bg-zinc-50 flex items-center justify-center border border-zinc-100 relative">
         {!imgError ? (
           <img
-            src={`http://localhost:3000${product.imageUrl}`}
+            src={`${APP_BASE_URL}${product.imageUrl}`}
             alt={product.name}
             onError={() => setImgError(true)}
             className="h-full w-full object-cover object-center group-hover:scale-110 transition duration-700 ease-in-out"

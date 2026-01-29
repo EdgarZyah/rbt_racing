@@ -6,8 +6,9 @@ import { useProduct } from '../../hooks/useProduct';
 import Table from '../../components/commons/Table';
 import ConfirmModal from '../../components/commons/ConfirmModal';
 import Notification from '../../components/commons/Notification';
+import { APP_BASE_URL } from '../../api/axios';
 
-const IMG_BASE_URL = "http://localhost:3000"; 
+const IMG_BASE_URL = APP_BASE_URL;
 
 export default function ProductList() {
   const { products, loading, error, getProducts, deleteProduct } = useProduct();
