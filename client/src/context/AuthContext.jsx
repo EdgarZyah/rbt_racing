@@ -106,6 +106,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+    const resendVerification = async (email) => {
+    try {
+      // Prioritaskan email dari parameter, jika tidak ada baru ambil dari localStorage
+      const targetEmail = email || localStorage.getItem("pending_email");
+      
+      if (!targetEmail) throw new Error("Email tidak ditemukan. Harap login ulang.");
+
+      // PENTING: Mengirim sebagai objek { email: ... }
+      const { data } = await instance.post("/auth/resend-verification", { 
+        email: targetEmail 
+      });
+
+      return { success: true, message: data.message };
+    } catch (error) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Gagal mengirim ulang email" 
+      };
+    }
+  };
+
   const logout = () => {
     localStorage.clear();
     setAxiosHeader(null);
@@ -120,6 +141,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         verifyEmail,
+        resendVerification,
         forgotPassword,
         resetPassword,
         loading,
@@ -131,3 +153,5 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+
+

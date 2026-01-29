@@ -1,3 +1,4 @@
+// client/src/pages/Cart.jsx
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, Box, MapPin, AlertCircle, Loader2, ShieldAlert } from 'lucide-react';
@@ -5,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useAddress } from '../hooks/useAddress';
 import { useAuth } from '../context/AuthContext'; 
 import ShippingModal from '../components/cart/ShippingModal';
+import ConfirmModal from '../components/commons/ConfirmModal'; // Pastikan path import benar
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -13,6 +15,15 @@ export default function Cart() {
   const { addresses, getAddresses, loading: loadingAddress } = useAddress();
   
   const [isShippingModalOpen, setShippingModalOpen] = useState(false);
+  
+  // State untuk Custom Modal Popup
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'info'
+  });
 
   useEffect(() => {
     getAddresses();
@@ -22,17 +33,27 @@ export default function Cart() {
   const mainAddress = addresses.find(addr => addr.isMain) || addresses[0];
 
   const handleCheckoutClick = () => {
-    // 1. Validasi Verifikasi Email
+    // 1. Validation: Email Verification
     if (user && !user.isVerified) {
-      alert("Akun Anda belum diverifikasi. Silakan verifikasi email Anda untuk melakukan transaksi.");
-      navigate('/customer'); // Dialihkan ke dashboard untuk resend link
+      setModalConfig({
+        isOpen: true,
+        title: "Account Not Verified",
+        message: "Your email is not verified. Please verify your account in the dashboard to proceed with checkout.",
+        onConfirm: () => navigate('/customer'),
+        type: 'warning'
+      });
       return;
     }
 
-    // 2. Validasi Alamat
+    // 2. Validation: Shipping Address
     if (!mainAddress) {
-      const confirmNav = confirm("No shipping address set. Go to Address Book?");
-      if (confirmNav) navigate('/customer/address');
+      setModalConfig({
+        isOpen: true,
+        title: "Address Required",
+        message: "No shipping address detected. Would you like to set up your delivery address now?",
+        onConfirm: () => navigate('/customer/address'),
+        type: 'info'
+      });
       return;
     }
 
@@ -41,18 +62,18 @@ export default function Cart() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-16 animate-in fade-in duration-700">
-      {/* Banner Peringatan: Redirect ke Dashboard */}
+      {/* Verification Warning Banner */}
       {user && !user.isVerified && (
         <div className="mb-8 bg-red-50 border border-red-200 p-4 flex items-center justify-between">
           <div className="flex items-center gap-3 text-red-600">
             <ShieldAlert size={20} />
-            <p className="text-xs font-bold uppercase tracking-widest">Akun belum diverifikasi. Checkout dinonaktifkan.</p>
+            <p className="text-xs font-bold uppercase tracking-widest">Account unverified. Checkout disabled.</p>
           </div>
-          <Link to="/customer" className="text-[10px] font-black uppercase underline text-red-600 hover:text-red-800">Verifikasi Sekarang</Link>
+          <Link to="/customer" className="text-[10px] font-black uppercase underline text-red-600 hover:text-red-800">Verify Now</Link>
         </div>
       )}
 
-      <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-12 border-b border-zinc-100 pb-8">
+      <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-12 border-b border-zinc-100 pb-8 text-left">
         Your Cart <span className="text-zinc-300 ml-2">({cartItems.length})</span>
       </h1>
 
@@ -68,7 +89,7 @@ export default function Cart() {
                     <Box className="text-zinc-200" size={32} />
                   )}
                 </div>
-                <div className="flex-grow">
+                <div className="flex-grow text-left">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-sm font-black uppercase tracking-tight">{item.name}</h3>
@@ -95,13 +116,14 @@ export default function Cart() {
             ))}
           </div>
 
-          <div className="bg-zinc-50 p-8 h-fit border border-zinc-100 sticky top-24">
+          {/* Sidebar Summary */}
+          <div className="bg-zinc-50 p-8 h-fit border border-zinc-100 sticky top-24 text-left">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 border-b border-zinc-200 pb-4">Order Summary</h2>
             
             <div className="mb-8">
               {loadingAddress ? (
                 <div className="flex items-center gap-2 text-zinc-400 py-4">
-                  <Loader2 className="animate-spin" size={16}/> <span className="text-xs">Loading address...</span>
+                  <Loader2 className="animate-spin" size={16}/> <span className="text-xs">Fetching address...</span>
                 </div>
               ) : mainAddress ? (
                 <div className="bg-white border border-zinc-200 p-4 relative group">
@@ -125,7 +147,7 @@ export default function Cart() {
             </div>
 
             <div className="space-y-4 text-xs mb-8 border-t border-zinc-200 pt-6">
-              <div className="flex justify-between text-zinc-500 italic">
+              <div className="flex justify-between text-zinc-500 italic font-bold uppercase">
                 <span>Subtotal</span>
                 <span>Rp {subtotal.toLocaleString('id-ID')}</span>
               </div>
@@ -140,7 +162,7 @@ export default function Cart() {
               disabled={!mainAddress}
               className={`w-full py-4 flex items-center justify-center group transition duration-300 shadow-xl ${user?.isVerified === false ? 'bg-zinc-300 cursor-not-allowed' : 'bg-black hover:bg-zinc-800 text-white'}`}
             >
-              <span className="text-xs font-bold uppercase tracking-[0.2em]">Checkout</span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em]">Proceed to Checkout</span>
               <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
@@ -153,6 +175,7 @@ export default function Cart() {
         </div>
       )}
 
+      {/* Shipping Logic Modal */}
       {mainAddress && (
         <ShippingModal 
           isOpen={isShippingModalOpen} 
@@ -161,6 +184,20 @@ export default function Cart() {
           userAddress={mainAddress} 
         />
       )}
+
+      {/* Global Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={() => {
+          setModalConfig({ ...modalConfig, isOpen: false });
+          modalConfig.onConfirm();
+        }}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText="Proceed"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

@@ -82,7 +82,7 @@ export default function VerifyEmail() {
               onClick={() => navigate('/customer')}
               className="w-full bg-black text-white py-5 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all active:scale-95 shadow-xl"
             >
-              Lanjutkan ke Dashboard <ChevronRight size={14} />
+              Continue to Dashboard <ChevronRight size={14} />
             </button>
           </div>
         )}
