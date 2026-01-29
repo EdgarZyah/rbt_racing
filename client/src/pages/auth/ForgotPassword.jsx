@@ -26,7 +26,7 @@ export default function ForgotPassword() {
           <MailCheck size={64} className="mx-auto mb-6 text-black" />
           <h1 className="text-3xl font-black italic uppercase mb-4">Email Transmitted</h1>
           <p className="text-[11px] text-zinc-500 uppercase tracking-widest mb-10">
-            Instruksi reset password telah dikirim ke <strong>{email}</strong>.
+            Reset password link has been sent to <strong>{email}</strong>.
           </p>
           <Link to="/login" className="text-[10px] font-black uppercase tracking-widest border-b-2 border-black pb-1">Back to Login</Link>
         </div>
