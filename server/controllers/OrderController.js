@@ -206,7 +206,7 @@ class OrderController {
       }
 
       await t.commit();
-      res.status(200).json({ message: `Cancelled ${count} expired orders.` });
+      res.status(200).json({ message: `CANCELLED ${count} expired orders.` });
     } catch (error) {
       await t.rollback();
       res.status(500).json({ message: error.message });

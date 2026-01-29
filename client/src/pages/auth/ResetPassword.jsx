@@ -18,7 +18,7 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setErrorMsg("Password tidak cocok.");
+      setErrorMsg("Password doesn't match.");
       return;
     }
 
@@ -43,14 +43,14 @@ export default function ResetPassword() {
             <CheckCircle size={64} className="mx-auto text-black mb-6" />
             <h1 className="text-2xl font-black italic uppercase mb-2 tracking-tighter">Password Updated</h1>
             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-relaxed">
-              Akses akun berhasil diperbarui. <br /> Mengalihkan Anda ke halaman login...
+              Account password successfully updated. <br /> Redirecting you to the login page...
             </p>
           </div>
         ) : (
           <>
             <div className="text-center mb-12">
               <h1 className="text-4xl font-black italic uppercase tracking-tighter">New Password</h1>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">Establish your new secure credentials</p>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">Create your new secure credentials</p>
             </div>
 
             {status === 'error' && (

@@ -101,8 +101,11 @@ export default function VerifyEmail() {
                 </div>
                 <h1 className="text-2xl font-black italic uppercase tracking-tighter mb-4">Link Transmitted</h1>
                 <p className="text-[11px] font-medium leading-relaxed text-zinc-500 uppercase tracking-widest mb-10">
-                  Link verifikasi baru telah dikirim ke email Anda. <br />
-                  Silakan periksa kotak masuk atau folder spam.
+                  New link has been sent to your email.
+                </p>
+                <br />
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-8">
+                  Didn't receive the email? Ensure to check your spam folder or try again later.
                 </p>
                 <Link to="/login" className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-black transition-colors">
                   Back to Login

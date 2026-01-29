@@ -32,9 +32,9 @@ export default function CustomerDashboard() {
           <div className="flex items-start sm:items-center gap-4 text-left">
             <MailWarning className="text-red-600 shrink-0" size={24} />
             <div>
-              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] mb-1 text-red-500">Aktivasi Diperlukan</h3>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] mb-1 text-red-500">Need Verification</h3>
               <p className="text-[10px] text-zinc-400 uppercase tracking-widest leading-relaxed">
-                Email <strong className="text-zinc-200 break-all">{user.email}</strong> belum diverifikasi.
+                Email <strong className="text-zinc-200 break-all">{user.email}</strong> not verified.
               </p>
             </div>
           </div>
@@ -57,7 +57,7 @@ export default function CustomerDashboard() {
       <div className="mb-10 lg:mb-12 text-left">
         <h1 className="text-3xl lg:text-4xl font-black italic tracking-tighter uppercase leading-none">My Account</h1>
         <p className="text-[9px] lg:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">
-          Welcome back, <span className="text-black">{user?.email?.split('@')[0]}</span>
+          Welcome back, <span className="text-black">{user?.email}</span>
         </p>
       </div>
 

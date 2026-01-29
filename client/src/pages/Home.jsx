@@ -1,9 +1,19 @@
 import React, { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Zap, ShieldCheck, Trophy, Mic2, Star, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  Zap,
+  ShieldCheck,
+  Trophy,
+  Star,
+  Loader2,
+  Volume2,
+} from "lucide-react";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { useProduct } from "../hooks/useProduct";
 import { APP_BASE_URL } from "../api/axios";
+import Aluminium from "../assets/thumbnail-1.png";
+import Carbon from "../assets/thumbnail-2.png";
 
 // Komponen Wrapper untuk animasi scroll
 const RevealSection = ({ children, animationClass }) => {
@@ -31,9 +41,10 @@ export default function Home() {
   }, [getProducts]);
 
   // Ambil 4 produk yang ditandai sebagai 'featured'
-  const featuredProducts = useMemo(() => 
-    products.filter(p => p.featured).slice(0, 4), 
-  [products]);
+  const featuredProducts = useMemo(
+    () => products.filter((p) => p.featured).slice(0, 4),
+    [products],
+  );
 
   // Data Testimoni
   const testimonials = [
@@ -68,7 +79,7 @@ export default function Home() {
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden border-b border-zinc-100 animate-in fade-in zoom-in-95 duration-1000">
         <div className="text-center z-10 px-6 max-w-5xl">
           <span className="text-[10px] uppercase tracking-[0.6em] text-zinc-400 mb-8 block font-black animate-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
-            Performance Excellence • Since 2024
+            Performance Excellence
           </span>
           <h1 className="text-7xl md:text-[10rem] font-black mb-10 tracking-tighter italic leading-[0.8] animate-in slide-in-from-bottom-8 duration-1000 delay-500 fill-mode-both">
             UNLEASH <br /> THE BEAST.
@@ -78,7 +89,7 @@ export default function Home() {
               to="/product"
               className="bg-black text-white px-14 py-5 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all duration-300 flex items-center group"
             >
-              Shop Collection
+              Collections
               <ArrowRight
                 size={14}
                 className="ml-3 group-hover:translate-x-2 transition-transform"
@@ -88,12 +99,12 @@ export default function Home() {
               to="/about"
               className="border border-zinc-200 text-black px-14 py-5 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-zinc-50 transition-all duration-300"
             >
-              Our Story
+              Contact Us
             </Link>
           </div>
         </div>
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] select-none pointer-events-none">
-          <span className="text-[40rem] font-black italic">RBT</span>
+          <span className="text-[10rem] sm:text-[20rem] md:text-[30rem] lg:text-[40rem] font-black italic">RBT</span>
         </div>
       </section>
 
@@ -110,10 +121,10 @@ export default function Home() {
               {
                 icon: ShieldCheck,
                 title: "Premium Material",
-                desc: "T304 Stainless Steel & Carbon Fiber.",
+                desc: "Aluminium & Carbon Fiber.",
               },
               {
-                icon: Mic2,
+                icon: Volume2,
                 title: "Signature Sound",
                 desc: "Deep, aggressive racing tone.",
               },
@@ -150,26 +161,31 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <Link
-              to="/product?category=MATIC"
+              to="/product?category=Aluminium"
               className="group relative h-[600px] overflow-hidden bg-zinc-100 border border-zinc-200"
             >
-              <div className="absolute inset-0 bg-zinc-200 group-hover:scale-105 transition-transform duration-1000"></div>
+              <div className="absolute inset-0 bg-zinc-200 group-hover:scale-105 transition-transform duration-1000">
+                <img src={Aluminium} className="p-8 w-full h-full object-cover" />
+              </div>
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-colors duration-500"></div>
               <div className="absolute bottom-12 left-12 text-white">
                 <h3 className="text-4xl font-black italic uppercase tracking-tighter">
-                  Matic Series
+                  Stainless Steel Series
                 </h3>
               </div>
             </Link>
             <Link
-              to="/product?category=SPORT"
+              to="/product?category=Carbon"
               className="group relative h-[600px] overflow-hidden bg-zinc-900 border border-zinc-800"
             >
-              <div className="absolute inset-0 bg-zinc-800 group-hover:scale-105 transition-transform duration-1000"></div>
+              <div className="absolute inset-0 bg-zinc-800 group-hover:scale-105 transition-transform duration-1000">
+                <img src={Carbon} className="p-8 w-full h-full object-cover" />
+              </div>
+
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/60 transition-colors duration-500"></div>
               <div className="absolute bottom-12 left-12 text-white">
                 <h3 className="text-4xl font-black italic uppercase tracking-tighter">
-                  Sport & Racing
+                  Carbon Series
                 </h3>
               </div>
             </Link>
@@ -198,9 +214,9 @@ export default function Home() {
           </div>
 
           {loading ? (
-             <div className="flex justify-center py-20 text-zinc-300">
-                <Loader2 className="animate-spin" size={32} />
-             </div>
+            <div className="flex justify-center py-20 text-zinc-300">
+              <Loader2 className="animate-spin" size={32} />
+            </div>
           ) : featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {featuredProducts.map((product) => (
@@ -212,13 +228,13 @@ export default function Home() {
                   <div className="aspect-square bg-zinc-100 mb-6 overflow-hidden">
                     {/* Tampilkan gambar produk asli jika ada */}
                     {product.imageUrl ? (
-                       <img 
-                        src={`${APP_BASE_URL}${product.imageUrl}`} 
+                      <img
+                        src={`${APP_BASE_URL}${product.imageUrl}`}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                       />
+                      />
                     ) : (
-                       <div className="w-full h-full bg-zinc-200 group-hover:scale-110 transition-transform duration-700"></div>
+                      <div className="w-full h-full bg-zinc-200 group-hover:scale-110 transition-transform duration-700"></div>
                     )}
                   </div>
                   <h4 className="text-[11px] font-black uppercase tracking-tight italic line-clamp-1">
@@ -226,7 +242,7 @@ export default function Home() {
                   </h4>
                   <div className="flex justify-between items-center mt-4">
                     <p className="text-xs font-black italic">
-                      Rp {product.price?.toLocaleString('id-ID')}
+                      Rp {product.price?.toLocaleString("id-ID")}
                     </p>
                   </div>
                 </Link>
@@ -234,7 +250,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="text-center py-20 text-zinc-300 text-xs font-black uppercase tracking-widest">
-               No featured items deployed
+              No featured items deployed
             </div>
           )}
         </div>

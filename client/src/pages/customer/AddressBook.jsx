@@ -29,7 +29,7 @@ export default function AddressBook() {
           onClick={() => { setEditingData(null); setIsFormOpen(true); }}
           className="w-full sm:w-auto bg-black text-white px-6 py-4 sm:py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-zinc-800 transition shadow-xl"
         >
-          <Plus size={14}/> <span>Add New</span>
+          <Plus size={14}/> <span>Add New Address</span>
         </button>
       </div>
 
@@ -43,7 +43,7 @@ export default function AddressBook() {
                 <div className="space-y-2 w-full">
                   <div className="flex items-center flex-wrap gap-3">
                     <span className="text-xs font-black uppercase tracking-tight">{addr.receiverName}</span>
-                    {addr.isMain && <span className="bg-black text-white text-[8px] font-bold px-2 py-0.5 uppercase tracking-wide italic">Main HQ</span>}
+                    {addr.isMain && <span className="bg-black text-white text-[8px] font-bold px-2 py-0.5 uppercase tracking-wide italic">Main Address</span>}
                   </div>
                   <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">{addr.phoneNumber}</p>
                   

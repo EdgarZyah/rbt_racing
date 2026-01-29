@@ -38,8 +38,8 @@ export default function ForgotPassword() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-white">
       <div className="max-w-md w-full animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-black italic uppercase tracking-tighter">Reset Access</h1>
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">Enter your email to recover account</p>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter">Reset Password</h1>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">Enter your email to Reset Password</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="relative group">
@@ -51,7 +51,7 @@ export default function ForgotPassword() {
             />
           </div>
           <button type="submit" disabled={isSubmitting} className="w-full bg-black text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all">
-            {isSubmitting ? <Loader2 className="animate-spin" size={14} /> : "RECOVER ACCOUNT"} <ArrowRight size={14} />
+            {isSubmitting ? <Loader2 className="animate-spin" size={14} /> : "RESET PASSWORD"} <ArrowRight size={14} />
           </button>
         </form>
       </div>

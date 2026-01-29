@@ -1,6 +1,7 @@
+// client/src/pages/customer/Order.jsx
 import React, { useState, useEffect } from 'react';
 import Table from '../../components/commons/Table';
-import { Eye, Loader2, CreditCard, ChevronRight, Calendar, X, Box, MapPin, Truck } from 'lucide-react';
+import { Eye, Loader2, CreditCard, ChevronRight, Calendar, X, Box, MapPin, Truck, Phone, User } from 'lucide-react';
 import { useOrder } from '../../hooks/useOrder';
 import { useNavigate } from 'react-router-dom';
 
@@ -91,12 +92,10 @@ export default function Order() {
 
       {orders.length > 0 ? (
         <>
-          {/* Desktop View */}
           <div className="hidden lg:block overflow-x-auto border border-zinc-100">
             <Table headers={headers} data={currentItems} renderRow={renderRow} />
           </div>
 
-          {/* Mobile Card View - Added horizontal overflow protection */}
           <div className="lg:hidden space-y-4 overflow-x-auto pb-4 no-scrollbar">
             <div className="min-w-full flex flex-col gap-4">
               {currentItems.map(order => (
@@ -133,7 +132,6 @@ export default function Order() {
             </div>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-12 overflow-x-auto no-scrollbar py-2">
               <button 
@@ -168,7 +166,7 @@ export default function Order() {
         </>
       ) : (
         <div className="text-center py-20 border border-dashed border-zinc-100 text-zinc-300 text-[10px] font-black uppercase tracking-[0.3em]">
-          No deployment history found
+          No Transaction history found
         </div>
       )}
 
@@ -186,15 +184,11 @@ export default function Order() {
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-zinc-100 transition"><X size={20}/></button>
             </div>
 
-            {/* Scrollable Modal Content */}
             <div className="flex-grow overflow-y-auto p-6 space-y-8 no-scrollbar">
-              
-              {/* PURCHASED GEAR SECTION - Added scrollable item list */}
               <div className="space-y-4">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-50 pb-2 flex items-center gap-2">
-                  <Box size={14} /> Purchased Gear
+                  <Box size={14} /> Purchased Item
                 </h3>
-                {/* Internal Scrollable for very long lists */}
                 <div className="max-h-64 overflow-y-auto overflow-x-auto pr-2 space-y-4 no-scrollbar">
                   {selectedOrder.items?.map((item, idx) => {
                     const snapshot = JSON.parse(item.productSnapshot || '{}');
@@ -233,29 +227,81 @@ export default function Order() {
                     Resi: <span className="text-black">{selectedOrder.resi || 'NOT ASSIGNED'}</span>
                   </p>
                 </div>
+                
+                {/* Updated Destination Info */}
                 <div className="space-y-3">
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
                     <MapPin size={14} /> Destination
                   </h4>
-                  <p className="text-[10px] text-zinc-600 font-bold leading-relaxed uppercase break-words">
-                    {typeof selectedOrder.shippingAddress === 'string' 
-                      ? JSON.parse(selectedOrder.shippingAddress).fullAddress 
-                      : selectedOrder.shippingAddress?.fullAddress}
-                  </p>
+                  <div className="text-[10px] text-zinc-600 space-y-1">
+                    {(() => {
+                      const addr = typeof selectedOrder.shippingAddress === 'string' 
+                        ? JSON.parse(selectedOrder.shippingAddress) 
+                        : selectedOrder.shippingAddress;
+                      
+                      return (
+                        <>
+                          <div className="flex items-center gap-1 mb-1">
+                            <User size={10} className="text-black" />
+                            <p className="font-black uppercase text-black">{addr?.receiverName || 'Guest'}</p>
+                          </div>
+                          <div className="flex items-center gap-1 mb-2">
+                            <Phone size={10} className="text-black" />
+                            <p className="font-bold">{addr?.phoneNumber || '-'}</p>
+                          </div>
+                          <p className="leading-relaxed uppercase font-medium border-t border-zinc-200 pt-2">
+                            {addr?.fullAddress}
+                          </p>
+                          <p className="uppercase font-bold text-zinc-500">
+                            {addr?.subDistrict}, {addr?.district}
+                          </p>
+                          <p className="uppercase font-bold text-zinc-500">
+                            {addr?.city}, {addr?.province}
+                          </p>
+                          <p className="font-black text-black">
+                            {addr?.postalCode}
+                          </p>
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
 
-              {/* Total Summary */}
-              <div className="border-t border-zinc-200 pt-6 space-y-2 shrink-0">
-                <div className="flex justify-between text-[10px] font-bold uppercase text-zinc-500 italic">
-                  <span>Shipping Cost</span>
-                  <span>Rp {selectedOrder.shippingCost?.toLocaleString('id-ID')}</span>
+              {/* Pembungkus Rincian */}
+                <div className="space-y-3 bg-zinc-50 p-6 border border-zinc-100 shadow-inner">
+                  <div className="flex items-center gap-2 mb-4 border-b border-zinc-200 pb-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Payment Breakdown</span>
+                  </div>
+
+                  {/* 1. Subtotal */}
+                  <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight text-zinc-500">
+                    <span>Item Subtotal ({selectedOrder.items?.length} Items)</span>
+                    <span>
+                      Rp {(selectedOrder.totalAmount - selectedOrder.shippingCost).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+
+                  {/* 2. Shipping Cost */}
+                  <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight text-zinc-500">
+                    <div className="flex items-center gap-1">
+                      <span>Shipping Fee</span>
+                      <span className="text-[9px] bg-zinc-200 px-1 text-zinc-600 rounded">{selectedOrder.shippingService}</span>
+                    </div>
+                    <span>Rp {selectedOrder.shippingCost?.toLocaleString('id-ID')}</span>
+                  </div>
+
+                  {/* Garis Pemisah Tambahan */}
+                  <div className="h-px bg-zinc-200 my-2 border-dashed border-t"></div>
+
+                  {/* 3. Grand Total */}
+                  <div className="flex justify-between items-end pt-2">
+                    <span className="text-xs font-black uppercase tracking-tighter">Grand Total</span>
+                    <span className="text-2xl font-black italic tracking-tighter text-black">
+                      Rp {selectedOrder.totalAmount?.toLocaleString('id-ID')}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-lg font-black italic uppercase tracking-tighter border-t border-zinc-100 pt-4">
-                  <span>Grand Total</span>
-                  <span>Rp {selectedOrder.totalAmount?.toLocaleString('id-ID')}</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

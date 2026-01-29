@@ -54,7 +54,7 @@ export default function Product() {
         <div className="absolute inset-0 bg-primary bg-cover bg-center opacity-20"></div>
         <div className="relative z-10">
            <h1 className="text-5xl md:text-8xl font-black italic tracking-tighter uppercase mb-4">Our Products</h1>
-           <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-[0.4em]">High Performance Equipment</p>
+           <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-[0.4em]">High Quality Equipment</p>
         </div>
       </section>
 
@@ -79,7 +79,7 @@ export default function Product() {
           <div className="relative w-full md:w-96 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 group-hover:text-black transition-colors" size={16} />
             <input 
-              type="text" placeholder="SEARCH ARMORY..." value={searchQuery}
+              type="text" placeholder="SEARCH..." value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-zinc-50 border border-zinc-200 py-4 pl-12 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-black outline-none transition-all focus:bg-white"
             />
@@ -122,7 +122,7 @@ export default function Product() {
              <div className="inline-block p-4 border border-zinc-100 rounded-full mb-4 bg-zinc-50">
                 <Search size={24} className="text-zinc-300" />
              </div>
-             <p className="text-zinc-300 uppercase text-xs font-black tracking-[0.3em]">No hardware found in this sector</p>
+             <p className="text-zinc-300 uppercase text-xs font-black tracking-[0.3em]">No Products found in this sector</p>
           </div>
         )}
       </div>

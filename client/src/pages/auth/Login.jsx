@@ -37,7 +37,7 @@ export default function Login() {
             Welcome Back
           </h1>
           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.4em]">
-            Secure Access to Your Armory
+            Log in to Your RBT Account
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export default function Login() {
             disabled={isSubmitting}
             className="w-full bg-black text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center space-x-3 hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50"
           >
-            <span>{isSubmitting ? "AUTHENTICATING..." : "ACCESS ACCOUNT"}</span>
+            <span>{isSubmitting ? "Authenticating..." : "Login"}</span>
             {!isSubmitting && <ArrowRight size={14} />}
           </button>
         </form>

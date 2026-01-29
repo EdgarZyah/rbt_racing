@@ -45,6 +45,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (username, email, password) => {
+    try {
+      // PERBAIKAN: Gunakan 'instance' bukan 'api'
+      const { data } = await instance.post('/auth/register', { username, email, password });
+      return { success: true, data };
+    } catch (err) {
+      return { 
+        success: false, 
+        message: err.response?.data?.message || "Registration failed" 
+      };
+    }
+  };
+
   const forgotPassword = async (email) => {
     try {
       const { data } = await instance.post("/auth/forgot-password", { email });
@@ -104,6 +117,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         login,
+        register,
         logout,
         verifyEmail,
         forgotPassword,

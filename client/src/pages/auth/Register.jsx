@@ -1,64 +1,60 @@
+// client/src/pages/auth/Register.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, Lock, ArrowRight, MailCheck } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false); // State baru untuk alur tampilan
-  
+  const [isRegistered, setIsRegistered] = useState(false); // TAMBAHKAN STATE INI
+
   const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
-    const result = await register(formData.username, formData.email, formData.password);
-    
-    if (result.success) {
-      setIsRegistered(true); // Ubah tampilan ke instruksi cek email
-    } else {
-      setError(result.message);
+    try {
+      const result = await register(formData.username, formData.email, formData.password);
+      
+      if (result.success) {
+        setIsRegistered(true); 
+      } else {
+        setError(result.message);
+        setIsSubmitting(false); // Kembalikan state jika gagal
+      }
+    } catch (err) {
+      setError("Connection failed");
       setIsSubmitting(false);
     }
   };
 
-  // Tampilan Instruksi Cek Email setelah sukses Register
+  // Tampilan Sukses (Opsional jika ingin langsung pindah halaman)
   if (isRegistered) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6">
-        <div className="w-full max-w-md text-center animate-in fade-in zoom-in duration-700">
-          <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center border border-zinc-100">
-              <MailCheck size={32} className="text-black" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-4">Check Your Inbox</h1>
-          <p className="text-[11px] font-medium leading-relaxed text-zinc-500 uppercase tracking-widest mb-10">
-            We have sent a verification link to <span className="text-black font-bold">{formData.email}</span>. <br /> 
-            Please click the link to activate your RBT_RACING account.
-          </p>
-          <Link to="/login" className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-black transition-colors">
-            Back to Login
-          </Link>
-        </div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-4xl font-black uppercase italic mb-4">Registration Sent</h1>
+        <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-8">
+          Please check your email <span className="text-black">{formData.email}</span> to verify your account.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
-      <div className="w-full max-w-mdw-full duration-1000">
+      <div className="w-full max-w-md">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black italic tracking-tighter uppercase mb-2">Join RBT</h1>
           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.4em]">Engineered for the Elite</p>
         </div>
 
         {error && (
-          <div className="bg-black text-white text-[10px] font-bold uppercase tracking-widest p-4 mb-8 text-center italic">
+          <div className="bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-widest p-4 mb-8 text-center border border-red-100">
             {error}
           </div>
         )}
@@ -107,8 +103,11 @@ export default function Register() {
             disabled={isSubmitting}
             className="w-full bg-black text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center space-x-3 hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50"
           >
-            <span>{isSubmitting ? 'CREATING...' : 'ESTABLISH ACCOUNT'}</span>
-            {!isSubmitting && <ArrowRight size={14} />}
+            {isSubmitting ? (
+              <><Loader2 className="animate-spin" size={14}/> <span>SYNCING...</span></>
+            ) : (
+              <><span>ESTABLISH ACCOUNT</span> <ArrowRight size={14} /></>
+            )}
           </button>
         </form>
 

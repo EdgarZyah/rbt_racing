@@ -116,7 +116,7 @@ export default function AddressForm({ initialData, onClose, onSuccess }) {
         <button onClick={onClose} className="absolute top-4 right-4 text-zinc-400 hover:text-black"><X/></button>
         
         <h2 className="text-2xl font-black italic uppercase mb-8">
-          {initialData ? 'Update Location' : 'New Deployment Point'}
+          {initialData ? 'Update Location' : 'New Shipping Address'}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -187,7 +187,7 @@ export default function AddressForm({ initialData, onClose, onSuccess }) {
           <div className="grid grid-cols-3 gap-6">
             {/* POSTAL CODE (AUTO-FILLED) */}
             <input 
-              type="text" placeholder="POSTAL CODE" required
+              type="text" placeholder="POSTAL CODE" required disabled
               value={formData.postalCode}
               onChange={e => setFormData({...formData, postalCode: e.target.value})}
               className="col-span-1 bg-zinc-50 border border-zinc-200 p-4 text-[10px] font-bold tracking-widest outline-none focus:border-black"
@@ -200,7 +200,7 @@ export default function AddressForm({ initialData, onClose, onSuccess }) {
                     onChange={e => setFormData({...formData, isMain: e.target.checked})}
                     className="w-4 h-4 accent-black"
                   />
-                  <span className="text-[10px] font-bold uppercase text-zinc-500">Set as Main HQ</span>
+                  <span className="text-[10px] font-bold uppercase text-zinc-500">Set as Main Address</span>
                 </label>
              </div>
           </div>

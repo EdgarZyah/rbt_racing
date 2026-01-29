@@ -127,9 +127,9 @@ export default function ProductDetail() {
   const isButtonDisabled = isOutOfStock || isSelectionInvalid || isMaxReached;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 animate-in fade-in duration-700">
+    <div className="max-w-7xl mx-auto px-6 py-12">
       <Link to="/product" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black mb-12 transition group">
-        <ChevronLeft size={14} className="mr-1 group-hover:-translate-x-1 transition-transform" /> Back to Armory
+        <ChevronLeft size={14} className="mr-1 group-hover:-translate-x-1 transition-transform" /> Back to Products
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
@@ -229,7 +229,7 @@ export default function ProductDetail() {
           >
             <ShoppingBag size={18} />
             <span className="text-[11px] font-black uppercase tracking-[0.3em]">
-                {isOutOfStock ? 'Out of Stock' : isMaxReached ? 'Max Stock in Cart' : 'Acquire Asset'}
+                {isOutOfStock ? 'Out of Stock' : isMaxReached ? 'Max Stock in Cart' : 'Add to Cart'}
             </span>
           </button>
         </div>
@@ -249,7 +249,7 @@ export default function ProductDetail() {
             {authModal.type === "LOGIN" ? (
               <>
                 <LogIn size={40} className="text-zinc-400 mb-4" />
-                <p className="text-sm font-medium text-zinc-600">Please login to shop and acquire assets from the armory.</p>
+                <p className="text-sm font-medium text-zinc-600">Please login to use cart.</p>
               </>
             ) : (
               <>

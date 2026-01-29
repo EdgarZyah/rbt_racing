@@ -90,7 +90,7 @@ export default function CustomerProfile() {
           disabled={loading}
           className="w-full lg:w-fit lg:px-10 bg-black text-white py-4 font-black uppercase tracking-widest text-[10px] hover:bg-zinc-800 transition shadow-xl active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2"
         >
-          {loading ? <Loader2 className="animate-spin" size={14}/> : 'Update Identity'}
+          {loading ? <Loader2 className="animate-spin" size={14}/> : 'Save Changes'}
         </button>
       </form>
 

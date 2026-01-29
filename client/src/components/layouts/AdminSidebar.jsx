@@ -1,9 +1,11 @@
+// client/src/components/layouts/AdminSidebar.jsx
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Layers, UserCircle, LogOut, Home, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmModal from '../commons/ConfirmModal'; 
 import Notification from '../commons/Notification';
-import { useState } from 'react';
+import logo from '../../assets/logo.png'; // IMPORT LOGO
 
 export default function AdminSidebar({ isOpen, setIsOpen }) {
   const location = useLocation();
@@ -21,17 +23,27 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Overview", path: "/admin" },
-    { icon: Package, label: "Products", path: "/admin/products" },
-    { icon: Layers, label: "Categories", path: "/admin/categories" },
     { icon: UserCircle, label: "Profile", path: "/admin/profile" },
     { icon: Home, label: "Shop Address", path: "/admin/shop-address" },
+    { icon: Package, label: "Products", path: "/admin/products" },
+    { icon: Layers, label: "Categories", path: "/admin/categories" },
     { icon: Users, label: "User Management", path: "/admin/users" },
-    { icon: ShoppingCart, label: "Orders", path: "/admin/orders" },
+    { icon: ShoppingCart, label: "Orders List", path: "/admin/orders" },
   ];
 
   return (
     <>
-      {/* 1. OVERLAY (Global) */}
+      {/* GLOBAL COMPONENTS (Di luar aside agar tampil di tengah layar) */}
+      <ConfirmModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onConfirm={handleLogout}
+        title="Security Exit"
+        message="Are you sure you want to end your administrative session?"
+      />
+      <Notification show={showNotif} message="Session terminated." onClose={() => setShowNotif(false)} />
+
+      {/* OVERLAY */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden transition-opacity"
@@ -39,32 +51,17 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
         />
       )}
 
-      {/* 2. CONFIRM MODAL (Global - diletakkan di luar aside agar z-index tidak terganggu) */}
-      <ConfirmModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onConfirm={handleLogout}
-        title="Log Out Confirmation"
-        message="Are you sure you want to end your administrative session?"
-      />
-
-      {/* 3. NOTIFICATION (Global) */}
-      <Notification show={showNotif} message="Session terminated." onClose={() => setShowNotif(false)} />
-
-      {/* 4. SIDEBAR ASIDE */}
+      {/* SIDEBAR ASIDE */}
       <aside className={`
         fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-zinc-100 p-8 z-[70]
         w-72 flex flex-col transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <div className="flex items-center justify-between mb-12">
-          <Link to="/" className="text-xl font-black italic tracking-tighter">RBT_ADMIN</Link>
-          <button 
-            onClick={() => setIsOpen(false)} 
-            className="lg:hidden p-2 hover:bg-zinc-100 rounded-full transition-colors"
-          >
-            <X size={20} />
-          </button>
+        <div className="flex items-center justify-between mb-2">
+          {/* Logo Section */}
+          <Link to="/" className="flex items-center w-full">
+            <img src={logo} alt="RBT RACING" className="h-30 w-auto m-auto object-contain" />
+          </Link>
         </div>
 
         <nav className="flex-grow space-y-1.5 overflow-y-auto no-scrollbar pr-2">

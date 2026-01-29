@@ -1,8 +1,9 @@
+// client/src/components/admin/OrderDetailModal.jsx
 import { useEffect, useState } from 'react';
 import { 
   X, Package, MapPin, CreditCard, Calendar, 
   Loader2, Truck, Download, Save, 
-  Image as ImageIcon, CheckCircle2
+  Image as ImageIcon, CheckCircle2, Phone, User
 } from 'lucide-react';
 import { useOrder } from '../../hooks/useOrder';
 import ConfirmModal from '../commons/ConfirmModal';
@@ -15,7 +16,6 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
   const [resiInput, setResiInput] = useState('');
   const [submittingResi, setSubmittingResi] = useState(false);
 
-  // State untuk Modal & Notif
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [notif, setNotif] = useState({ show: false, message: '', type: 'success' });
 
@@ -32,14 +32,12 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
     }
   }, [isOpen, orderId, getOrderById]);
 
-  // Handler pemicu modal konfirmasi
   const triggerConfirm = (e) => {
     e.preventDefault();
     if (!resiInput.trim()) return alert("Resi number cannot be empty");
     setIsConfirmOpen(true);
   };
 
-  // Handler Eksekusi Simpan Resi
   const handleSaveResi = async () => {
     setIsConfirmOpen(false);
     setSubmittingResi(true);
@@ -69,8 +67,6 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
   if (!isOpen) return null;
   const parseData = (data) => { try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return {}; } };
   const BASE_URL = 'http://localhost:3000'; 
-
-  // Variabel Helper untuk State Tombol
   const isAlreadyShipped = order?.status === 'SHIPPED';
 
   return (
@@ -97,7 +93,7 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
               <div className="lg:col-span-2 space-y-8">
-                {/* STATUS & DATE */}
+                {/* STATUS BAR */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-50 p-4 border border-zinc-100 gap-4">
                   <div className="flex items-center gap-3">
                     <div className="bg-white p-2 border border-zinc-200"><Calendar size={16} /></div>
@@ -112,7 +108,7 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
                   }`}>{order.status}</span>
                 </div>
 
-                {/* LOGISTICS (ADMIN ACTION) */}
+                {/* LOGISTICS MANAGEMENT */}
                 {(order.status === 'PAID' || order.status === 'SHIPPED') && (
                   <div className={`p-5 lg:p-6 rounded-sm text-left border ${isAlreadyShipped ? 'bg-zinc-50 border-zinc-100' : 'bg-blue-50 border-blue-100'}`}>
                     <h3 className={`text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${isAlreadyShipped ? 'text-zinc-400' : 'text-blue-700'}`}>
@@ -120,41 +116,26 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
                     </h3>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <div className="flex-1">
-                        <label className={`text-[8px] font-black uppercase tracking-[0.2em] mb-1 block ${isAlreadyShipped ? 'text-zinc-300' : 'text-blue-400'}`}>
-                          Tracking Number (Resi)
-                        </label>
+                        <label className={`text-[8px] font-black uppercase tracking-[0.2em] mb-1 block ${isAlreadyShipped ? 'text-zinc-300' : 'text-blue-400'}`}>Tracking Number (Resi)</label>
                         <input 
-                          type="text" value={resiInput} 
-                          onChange={(e) => setResiInput(e.target.value)}
+                          type="text" value={resiInput} onChange={(e) => setResiInput(e.target.value)}
                           disabled={isAlreadyShipped}
                           placeholder="INPUT NO. RESI..."
-                          className={`w-full p-3 text-xs font-black border rounded-sm outline-none uppercase transition-all ${
-                            isAlreadyShipped 
-                            ? 'bg-zinc-100 border-zinc-200 text-zinc-400 cursor-not-allowed' 
-                            : 'bg-white border-blue-200 focus:border-blue-500'
-                          }`}
+                          className={`w-full p-3 text-xs font-black border rounded-sm outline-none uppercase transition-all ${isAlreadyShipped ? 'bg-zinc-100 border-zinc-200 text-zinc-400 cursor-not-allowed' : 'bg-white border-blue-200 focus:border-blue-500'}`}
                         />
                       </div>
                       <button 
-                        onClick={triggerConfirm} 
-                        disabled={submittingResi || isAlreadyShipped}
-                        className={`px-6 py-4 sm:py-0 rounded-sm font-black text-[10px] uppercase tracking-widest transition flex items-center justify-center gap-2 shadow-sm ${
-                          isAlreadyShipped 
-                          ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700 active:translate-y-0.5'
-                        }`}
+                        onClick={triggerConfirm} disabled={submittingResi || isAlreadyShipped}
+                        className={`px-6 py-4 sm:py-0 rounded-sm font-black text-[10px] uppercase tracking-widest transition flex items-center justify-center gap-2 shadow-sm ${isAlreadyShipped ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                       >
                         {submittingResi ? <Loader2 className="animate-spin" size={14}/> : isAlreadyShipped ? <CheckCircle2 size={14}/> : <Save size={14}/>}
                         <span>{isAlreadyShipped ? 'DISPATCHED' : 'SUBMIT RESI'}</span>
                       </button>
                     </div>
-                    {isAlreadyShipped && (
-                      <p className="mt-3 text-[9px] font-bold text-zinc-400 uppercase italic">* resi has been locked after shipment</p>
-                    )}
                   </div>
                 )}
 
-                {/* ITEMS TABLE */}
+                {/* PURCHASED UNITS */}
                 <div className="text-left">
                   <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2"><Package size={14}/> Purchased Units</h3>
                   <div className="border border-zinc-100 overflow-x-auto no-scrollbar">
@@ -183,34 +164,54 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
                   </div>
                 </div>
 
-                {/* ADDRESS BOX */}
-                <div className="bg-zinc-50 p-4 border border-zinc-100 text-left">
-                  <h4 className="text-[9px] font-black text-zinc-300 uppercase tracking-widest mb-3 flex items-center gap-2"><MapPin size={12}/> Shipping Coordinates</h4>
+                {/* DETAILED SHIPPING ADDRESS */}
+                <div className="bg-zinc-50 p-6 border border-zinc-100 text-left">
+                  <h4 className="text-[9px] font-black text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2"><MapPin size={12}/> Shipping Coordinates</h4>
                   {(() => {
                     const addr = parseData(order.shippingAddress);
                     return (
-                      <div className="space-y-1">
-                        <p className="text-xs font-black uppercase">{addr.receiverName}</p>
-                        <p className="text-[10px] text-zinc-500 font-medium leading-relaxed uppercase">{addr.fullAddress}, {addr.city}</p>
-                        <p className="text-[10px] font-black text-zinc-400 tracking-tighter">TEL: {addr.phoneNumber}</p>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex items-center gap-3 bg-white p-3 border border-zinc-100">
+                             <User size={14} className="text-zinc-400" />
+                             <div>
+                               <p className="text-[8px] font-black text-zinc-300 uppercase">Receiver</p>
+                               <p className="text-[11px] font-black uppercase tracking-tighter">{addr.receiverName}</p>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-3 bg-white p-3 border border-zinc-100">
+                             <Phone size={14} className="text-zinc-400" />
+                             <div>
+                               <p className="text-[8px] font-black text-zinc-300 uppercase">Contact</p>
+                               <p className="text-[11px] font-black tracking-tighter">{addr.phoneNumber}</p>
+                             </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1 mt-2">
+                          <p className="text-[8px] font-black text-zinc-300 uppercase">Full Address</p>
+                          <p className="text-xs font-bold leading-relaxed uppercase">{addr.fullAddress}</p>
+                          <p className="text-[10px] text-zinc-500 font-bold uppercase italic tracking-tight">
+                            {addr.subDistrict}, {addr.district}
+                          </p>
+                          <p className="text-[10px] text-zinc-500 font-bold uppercase italic tracking-tight">
+                            {addr.city}, {addr.province}
+                          </p>
+                          <p className="text-[11px] font-black text-black mt-2">ZIP: {addr.postalCode}</p>
+                        </div>
                       </div>
                     );
                   })()}
                 </div>
               </div>
 
-              {/* KOLOM KANAN */}
+              {/* RIGHT COLUMN: PROOF & SUMMARY */}
               <div className="space-y-6">
                 <div className="border border-zinc-200 p-4 text-left">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2"><CreditCard size={14}/> Payment Proof</h3>
                     {order.paymentProof && (
-                      <button 
-                        onClick={() => handleDownloadImage(`${BASE_URL}/uploads/${order.paymentProof}`, `RBT-${orderId}.webp`)}
-                        className="text-[9px] font-bold bg-zinc-100 px-2 py-1 flex items-center gap-1 hover:bg-black hover:text-white transition"
-                      >
-                        <Download size={10}/> SAVE
-                      </button>
+                      <button onClick={() => handleDownloadImage(`${BASE_URL}/uploads/${order.paymentProof}`, `RBT-${orderId}.webp`)} className="text-[9px] font-bold bg-zinc-100 px-2 py-1 flex items-center gap-1 hover:bg-black hover:text-white transition"><Download size={10}/> SAVE</button>
                     )}
                   </div>
                   {order.paymentProof ? (
@@ -218,18 +219,15 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
                       <img src={`${BASE_URL}/uploads/${order.paymentProof}`} alt="Proof" className="w-full h-full object-contain cursor-zoom-in active:scale-110 transition-transform duration-500" onClick={() => window.open(`${BASE_URL}/uploads/${order.paymentProof}`, '_blank')} />
                     </div>
                   ) : (
-                    <div className="aspect-[3/4] bg-zinc-50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-zinc-300">
-                      <ImageIcon size={24} className="mb-2 opacity-20"/>
-                      <span className="text-[9px] font-black uppercase tracking-widest">No Asset Uploaded</span>
-                    </div>
+                    <div className="aspect-[3/4] bg-zinc-50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-zinc-300"><ImageIcon size={24} className="mb-2 opacity-20"/><span className="text-[9px] font-black uppercase tracking-widest">No Asset Uploaded</span></div>
                   )}
                 </div>
 
                 <div className="bg-black text-white p-6 rounded-sm text-left shadow-xl">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] mb-6 border-b border-zinc-800 pb-2 text-zinc-500">Economic Summary</h3>
-                  <div className="space-y-3 text-[11px] mb-6">
-                    <div className="flex justify-between text-zinc-400 uppercase font-bold"><span>Logistic</span><span>Rp {order.shippingCost?.toLocaleString('id-ID')}</span></div>
-                    <div className="flex justify-between text-zinc-400 uppercase font-bold"><span>Subtotal</span><span>Rp {(order.totalAmount - order.shippingCost)?.toLocaleString('id-ID')}</span></div>
+                  <div className="space-y-3 text-[11px] mb-6 italic">
+                    <div className="flex justify-between text-zinc-400 uppercase font-bold"><span>Logistic Cost</span><span>Rp {order.shippingCost?.toLocaleString('id-ID')}</span></div>
+                    <div className="flex justify-between text-zinc-400 uppercase font-bold"><span>Tax & Handling</span><span>Included</span></div>
                   </div>
                   <div className="flex justify-between items-end border-t border-zinc-800 pt-4">
                     <span className="text-[10px] font-black uppercase text-zinc-500">Total Payable</span>
@@ -237,27 +235,14 @@ export default function OrderDetailModal({ isOpen, onClose, orderId }) {
                   </div>
                 </div>
               </div>
+
             </div>
           ) : <div className="text-center py-20 text-zinc-400 uppercase font-black text-xs">Access denied or data missing.</div>}
         </div>
       </div>
 
-      {/* MODAL KONFIRMASI INPUT RESI */}
-      <ConfirmModal
-        isOpen={isConfirmOpen}
-        onClose={() => setIsConfirmOpen(false)}
-        onConfirm={handleSaveResi}
-        title="Confirm Shipment"
-        message={`Are you sure the waybill number ${resiInput} is correct? This cannot be undone and mark the order as SHIPPED.`}
-      />
-
-      {/* NOTIFIKASI BERHASIL/GAGAL */}
-      <Notification
-        show={notif.show}
-        type={notif.type}
-        message={notif.message}
-        onClose={() => setNotif({ ...notif, show: false })}
-      />
+      <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} onConfirm={handleSaveResi} title="Confirm Shipment" message={`Are you sure the waybill number ${resiInput} is correct?`} />
+      <Notification show={notif.show} type={notif.type} message={notif.message} onClose={() => setNotif({ ...notif, show: false })} />
     </div>
   );
 }

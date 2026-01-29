@@ -117,8 +117,8 @@ export default function Payment() {
     if (result.success) {
       setModalConfig({
         isOpen: true,
-        title: "Payment Transmitted",
-        message: "Bukti pembayaran berhasil dikirim. Admin akan segera melakukan verifikasi.",
+        title: "Payment Successful",
+        message: "Payment confirmed successfully, please wait for admin to verify the payment.",
         type: "success"
       });
     } else {
@@ -173,7 +173,8 @@ export default function Payment() {
       <div className="space-y-8">
         {/* TOTAL AMOUNT BOX */}
         <div className="bg-zinc-50 border border-zinc-200 p-8 text-center relative">
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">Total Payable Amount</p>
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">Total Amount To Pay</p>
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">Please transfer the exact amount to the account below:</p>
           <div className="flex items-center justify-center gap-4">
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">Rp {orderData?.totalAmount.toLocaleString('id-ID')}</h2>
             <button onClick={() => copyToClipboard(orderData?.totalAmount)} className="p-2 hover:bg-zinc-200 transition-all active:scale-90">
