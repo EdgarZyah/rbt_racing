@@ -62,7 +62,7 @@ export default function Login() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full bg-zinc-50 border border-zinc-100 py-4 pl-12 pr-4 text-[10px] font-bold tracking-widest uppercase focus:bg-white focus:border-black outline-none transition-all duration-300"
+                className="w-full bg-zinc-50 border border-zinc-100 py-4 pl-12 pr-4 text-[10px] font-bold tracking-widest focus:bg-white focus:border-black outline-none transition-all duration-300"
               />
             </div>
 
@@ -79,7 +79,7 @@ export default function Login() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full bg-zinc-50 border border-zinc-100 py-4 pl-12 pr-12 text-[10px] font-bold tracking-widest uppercase focus:bg-white focus:border-black outline-none transition-all duration-300"
+                className="w-full bg-zinc-50 border border-zinc-100 py-4 pl-12 pr-12 text-[10px] font-bold tracking-widest focus:bg-white focus:border-black outline-none transition-all duration-300"
               />
               <button
                 type="button"
