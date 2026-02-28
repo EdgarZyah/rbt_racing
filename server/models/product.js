@@ -40,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
   Product.associate = (models) => {
     Product.belongsTo(models.Category);
     Product.hasMany(models.ProductVariant, { as: 'variants', onDelete: 'CASCADE' });
+    Product.hasMany(models.Review, { foreignKey: 'ProductId' });
   };
 
   return Product;

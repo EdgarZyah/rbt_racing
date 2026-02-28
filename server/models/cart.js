@@ -6,7 +6,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 1
     },
-    // Kita simpan varian sebagai string JSON untuk fleksibilitas
     selectedVariants: {
       type: DataTypes.TEXT, 
       allowNull: true,
@@ -20,6 +19,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     rawVariantId: {
       type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    // Tambahkan field note
+    note: {
+      type: DataTypes.TEXT,
       allowNull: true
     }
   });

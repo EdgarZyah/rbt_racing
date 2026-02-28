@@ -29,7 +29,7 @@ const processImages = async (req, res, next) => {
     // Proses Main Image
     if (req.files['image']) {
       const fileName = `main-${timestamp}.webp`;
-      await sharp(req.files['image'][0].buffer)
+      await sharp(req.files['image'].buffer)
         .resize(800)
         .webp({ quality: 80 })
         .toFile(path.join(uploadPath, fileName));
@@ -94,5 +94,39 @@ const processPaymentProof = async (req, res, next) => {
   }
 };
 
-// Export 'upload' agar bisa dipakai sebagai upload.single()
-module.exports = { upload, uploadFields, processImages, processPaymentProof };
+// 4. Processor Gambar Review (KHUSUS REVIEW)
+// server/middleware/uploadMiddleware.js
+
+const processReviewImage = async (req, res, next) => {
+  // Jika tidak ada file yang diunggah, lanjut ke controller
+  if (!req.file) return next();
+
+  try {
+    const timestamp = Date.now();
+    const uploadPath = path.join(__dirname, '../uploads');
+    
+    // Pastikan folder uploads ada
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
+    const fileName = `review-${timestamp}.webp`;
+
+    // Proses gambar menggunakan Sharp
+    await sharp(req.file.buffer)
+      .resize(800) // Batasi lebar maksimal agar hemat storage
+      .webp({ quality: 80 })
+      .toFile(path.join(uploadPath, fileName));
+
+    // SIMPAN PATH KE req.body agar Controller bisa mengambilnya
+    // Kita simpan dengan prefix /uploads/ supaya konsisten dengan data produk
+    req.body.imageUrl = `/uploads/${fileName}`;
+
+    next();
+  } catch (error) {
+    console.error("Review Image Processing Error:", error);
+    res.status(500).json({ message: "Gagal memproses gambar ulasan" });
+  }
+};
+// Export semua termasuk processReviewImage
+module.exports = { upload, uploadFields, processImages, processPaymentProof, processReviewImage };

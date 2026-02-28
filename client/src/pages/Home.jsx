@@ -1,19 +1,9 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  Zap,
-  ShieldCheck,
-  Trophy,
-  Star,
-  Loader2,
-  Volume2,
-} from "lucide-react";
+import { ArrowRight, Star, Loader2 } from "lucide-react";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { useProduct } from "../hooks/useProduct";
-import { APP_BASE_URL } from "../api/axios";
-import Aluminium from "../assets/thumbnail-1.png";
-import Carbon from "../assets/thumbnail-2.png";
+import axiosInstance, { APP_BASE_URL } from "../api/axios";
 
 // Komponen Wrapper untuk animasi scroll
 const RevealSection = ({ children, animationClass }) => {
@@ -34,48 +24,46 @@ const RevealSection = ({ children, animationClass }) => {
 
 export default function Home() {
   const { products, getProducts, loading } = useProduct();
+  const [testimonials, setTestimonials] = useState([]);
+  const [loadingTestimonies, setLoadingTestimonies] = useState(true);
 
-  // Fetch data produk saat component dimount
+  // Fetch data produk dan testimoni saat component dimount
   useEffect(() => {
     getProducts();
+    
+    // Fetch Testimoni
+    const fetchTestimonials = async () => {
+      try {
+        const response = await axiosInstance.get("/testimonials");
+        setTestimonials(response.data);
+      } catch (error) {
+        console.error("Gagal mengambil data testimoni:", error);
+      } finally {
+        setLoadingTestimonies(false);
+      }
+    };
+
+    fetchTestimonials();
   }, [getProducts]);
 
   // Ambil 4 produk yang ditandai sebagai 'featured'
   const featuredProducts = useMemo(
     () => products.filter((p) => p.featured).slice(0, 4),
-    [products],
+    [products]
   );
 
-  // Data Testimoni
-  const testimonials = [
-    {
-      text: "Sound RBT Carbon Pro bener-bener gahar dan dapet boost tenaga signifikan!",
-      author: "Alex 'Shadow' Rider",
-      role: "Sportbike User",
-    },
-    {
-      text: "Finish quality-nya juara. Gak kalah sama brand knalpot Eropa!",
-      author: "Budi 'Piston'",
-      role: "Racing Enthusiast",
-    },
-    {
-      text: "Pemasangan PNP di Matic saya, tarikan jadi lebih enteng di putaran atas.",
-      author: "Sultan Matic",
-      role: "Daily Rider",
-    },
-    {
-      text: "Desain carbon-nya asli, bikin motor kelihatan lebih premium.",
-      author: "Rider X",
-      role: "Custom Builder",
-    },
-  ];
-
-  // Duplikasi data untuk loop carousel yang smooth
-  const doubledTestimonials = [...testimonials, ...testimonials];
+  // LOGIKA BARU: Cek apakah butuh di-scroll (misal jika testimoni >= 4)
+  const MIN_ITEMS_FOR_SCROLL = 4; 
+  const isScrollable = testimonials.length >= MIN_ITEMS_FOR_SCROLL;
+  
+  // Jika butuh scroll, gandakan array agar animasinya smooth. Jika tidak, tampilkan apa adanya.
+  const displayTestimonials = isScrollable 
+    ? [...testimonials, ...testimonials, ...testimonials] 
+    : testimonials;
 
   return (
     <div className="overflow-hidden bg-white">
-      {/* 1. HERO SECTION - Langsung Muncul */}
+      {/* 1. HERO SECTION */}
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden border-b border-zinc-100 animate-in fade-in zoom-in-95 duration-1000">
         <div className="text-center z-10 px-6 max-w-5xl">
           <span className="text-[10px] uppercase tracking-[0.6em] text-zinc-400 mb-8 block font-black animate-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
@@ -108,92 +96,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. CORE VALUES - Slide from Left */}
-      <RevealSection animationClass="fade-in slide-in-from-left-20">
-        <section className="py-24 border-b border-zinc-100 bg-zinc-50/50">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
-            {[
-              {
-                icon: Zap,
-                title: "Max Power",
-                desc: "Optimized exhaust flow for peak gains.",
-              },
-              {
-                icon: ShieldCheck,
-                title: "Premium Material",
-                desc: "Aluminium & Carbon Fiber.",
-              },
-              {
-                icon: Volume2,
-                title: "Signature Sound",
-                desc: "Deep, aggressive racing tone.",
-              },
-              {
-                icon: Trophy,
-                title: "Track Proven",
-                desc: "Tested under extreme conditions.",
-              },
-            ].map((feature, i) => (
-              <div key={i} className="text-center space-y-4">
-                <div className="flex justify-center">
-                  <feature.icon size={24} strokeWidth={1.5} />
-                </div>
-                <h3 className="text-[11px] font-black uppercase tracking-widest">
-                  {feature.title}
-                </h3>
-                <p className="text-[11px] text-zinc-400 uppercase leading-relaxed font-medium">
-                  {feature.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </RevealSection>
-
-      {/* 3. ARSENAL - Slide from Right */}
-      <RevealSection animationClass="fade-in slide-in-from-right-20">
-        <section className="py-32 max-w-7xl mx-auto px-6">
-          <div className="mb-20 text-center">
-            <h2 className="text-4xl font-black italic tracking-tighter uppercase">
-              The Arsenal
-            </h2>
-            <div className="w-20 h-1 bg-black mx-auto mt-4"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <Link
-              to="/product?category=Aluminium"
-              className="group relative h-[600px] overflow-hidden bg-zinc-100 border border-zinc-200"
-            >
-              <div className="absolute inset-0 bg-zinc-200 group-hover:scale-105 transition-transform duration-1000">
-                <img src={Aluminium} className="p-8 w-full h-full object-cover" />
-              </div>
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-colors duration-500"></div>
-              <div className="absolute bottom-12 left-12 text-white">
-                <h3 className="text-4xl font-black italic uppercase tracking-tighter">
-                  Stainless Steel Series
-                </h3>
-              </div>
-            </Link>
-            <Link
-              to="/product?category=Carbon"
-              className="group relative h-[600px] overflow-hidden bg-zinc-900 border border-zinc-800"
-            >
-              <div className="absolute inset-0 bg-zinc-800 group-hover:scale-105 transition-transform duration-1000">
-                <img src={Carbon} className="p-8 w-full h-full object-cover" />
-              </div>
-
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/60 transition-colors duration-500"></div>
-              <div className="absolute bottom-12 left-12 text-white">
-                <h3 className="text-4xl font-black italic uppercase tracking-tighter">
-                  Carbon Series
-                </h3>
-              </div>
-            </Link>
-          </div>
-        </section>
-      </RevealSection>
-
-      {/* 4. FEATURED SECTION */}
+      {/* 2. FEATURED SECTION */}
       <section className="py-32 bg-zinc-50 border-y border-zinc-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-end mb-16">
@@ -226,7 +129,6 @@ export default function Home() {
                   className="group bg-white border border-zinc-200 p-6 transition-all hover:shadow-2xl"
                 >
                   <div className="aspect-square bg-zinc-100 mb-6 overflow-hidden">
-                    {/* Tampilkan gambar produk asli jika ada */}
                     {product.imageUrl ? (
                       <img
                         src={`${APP_BASE_URL}${product.imageUrl}`}
@@ -254,48 +156,60 @@ export default function Home() {
             </div>
           )}
         </div>
-      </section>
+      </section>      
 
-      {/* 5. TESTIMONIALS CAROUSEL - Smooth Infinite Scroll */}
+      {/* 3. TESTIMONIALS CAROUSEL */}
       <RevealSection animationClass="fade-in duration-1000">
         <section className="py-32 overflow-hidden bg-white border-b border-zinc-100">
           <div className="mb-16 text-center px-6">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-4">
-              The Rider Voices
-            </h2>
             <h3 className="text-3xl font-black italic tracking-tighter uppercase">
-              Trusted by the Community
+              Our testimonials
             </h3>
-          </div>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2">
+              Hear it from our satisfied customers
+            </p>
+           </div>
 
-          <div className="relative flex">
-            {/* Animasi berjalan di sini */}
-            <div className="animate-infinite-scroll">
-              {doubledTestimonials.map((item, index) => (
-                <div
-                  key={index}
-                  className="w-[350px] md:w-[450px] mx-6 flex-shrink-0 bg-zinc-50 p-10 border border-zinc-100"
-                >
-                  <div className="flex text-black mb-6">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={12} fill="currentColor" />
-                    ))}
-                  </div>
-                  <p className="text-lg font-light italic leading-snug tracking-tight mb-8">
-                    "{item.text}"
-                  </p>
-                  <div className="border-t border-zinc-200 pt-6">
-                    <p className="text-xs font-black uppercase tracking-widest italic">
-                      {item.author}
+          {loadingTestimonies ? (
+             <div className="flex justify-center py-10 text-zinc-300">
+               <Loader2 className="animate-spin" size={32} />
+             </div>
+          ) : testimonials.length > 0 ? (
+            <div className="relative w-full overflow-hidden">
+              {/* Jika isScrollable true, pakaikan class animasi. Jika false, jadikan flex biasa dan tengahkan */}
+              <div 
+                className={`flex ${isScrollable ? "animate-infinite-scroll w-max" : "justify-center flex-wrap gap-y-6 w-full"}`}
+              >
+                {displayTestimonials.map((item, index) => (
+                  <div
+                    key={`${item.id}-${index}`}
+                    className="w-[350px] md:w-[450px] mx-6 flex-shrink-0 bg-zinc-50 p-10 border border-zinc-100"
+                  >
+                    <div className="flex text-black mb-6">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={12} fill={i < item.rating ? "currentColor" : "none"} className={i < item.rating ? "text-black" : "text-zinc-300"} />
+                      ))}
+                    </div>
+                    <p className="text-lg font-light italic leading-snug tracking-tight mb-8">
+                      "{item.content}"
                     </p>
-                    <p className="text-[9px] text-zinc-400 uppercase tracking-widest mt-1">
-                      {item.role}
-                    </p>
+                    <div className="border-t border-zinc-200 pt-6">
+                      <p className="text-xs font-black uppercase tracking-widest italic">
+                        {item.customerName}
+                      </p>
+                      <p className="text-[9px] text-zinc-400 uppercase tracking-widest mt-1">
+                        {item.role || "Customer"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+             <div className="text-center py-10 text-zinc-300 text-xs font-black uppercase tracking-widest">
+                Belum ada testimoni.
+             </div>
+          )}
         </section>
       </RevealSection>
     </div>

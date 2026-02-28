@@ -201,7 +201,7 @@ export default function Payment() {
         {/* UPLOAD SECTION */}
         <div className="bg-zinc-50 border border-zinc-200 p-6">
            <h3 className="text-[10px] font-black uppercase tracking-widest mb-6 flex items-center gap-2">
-             <Upload size={14}/> Transmission Proof
+             <Upload size={14}/> Payment Proof
            </h3>
            <label className="flex flex-col items-center justify-center w-full min-h-[200px] border-2 border-dashed border-zinc-300 bg-white cursor-pointer hover:border-black transition-all relative">
               {previewUrl ? (
@@ -226,7 +226,7 @@ export default function Payment() {
             {uploading ? (
               <><Loader2 className="animate-spin" size={16}/> Syncing Data...</>
             ) : (
-              <><CheckCircle size={16}/> Finalize Transaction</>
+              <><CheckCircle size={16}/> Confirm Transaction</>
             )}
           </button>
         </div>

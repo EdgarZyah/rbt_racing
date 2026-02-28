@@ -2,8 +2,9 @@
 import { Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/commons/ScrollToTop";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import AIFloatingButton from "./components/commons/AIFloatingButton"; // <-- Import komponen AI Floating Button
 
-// Layouts & Pages (Impor tetap sama)
+// Layouts & Pages
 import MainLayout from "./layouts/MainLayout";
 import CustomerLayout from "./layouts/CustomerLayout";
 import HomePage from "./pages/Home";
@@ -11,6 +12,9 @@ import Product from "./pages/Product";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import AboutUs from "./pages/AboutUs";
+import Contact from "./pages/Contact";
+import AIChatbot from "./pages/AIChatbot";
+
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -29,6 +33,7 @@ import AddProduct from "./pages/admin/AddProduct";
 import EditProduct from "./pages/admin/EditProduct";
 import OrderList from "./pages/admin/OrderList";
 import Category from "./pages/admin/Category";
+import Testimonies from "./pages/admin/Testimonies";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminProfile from "./pages/admin/AdminProfile";
 
@@ -45,6 +50,8 @@ function App() {
           <Route path="product/:id" element={<ProductDetail />} />
           <Route path="cart" element={<Cart />} />
           <Route path="about" element={<AboutUs />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="ai-chatbot" element={<AIChatbot />} />
           
           <Route path="login" element={
             <ProtectedRoute guestOnly>
@@ -80,6 +87,7 @@ function App() {
           <Route path="product/edit/:id" element={<EditProduct />} />
           <Route path="orders" element={<OrderList />} />
           <Route path="categories" element={<Category />} />
+          <Route path="testimonies" element={<Testimonies />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="shop-address" element={<ShopAddress />} />
@@ -97,6 +105,9 @@ function App() {
           <Route path="address" element={<AddressBook />} /> 
         </Route>
       </Routes>
+
+      {/* LETAKKAN DI SINI: Render secara global, di luar Routes */}
+      <AIFloatingButton />
     </>
   );
 }

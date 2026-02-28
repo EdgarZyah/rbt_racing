@@ -62,13 +62,15 @@ class OrderController {
 
         productTotal += (product.price * item.quantity);
 
+        // Memasukkan data untuk OrderItem termasuk note dari keranjang
         orderItemsData.push({
           ProductId: product.id,
           quantity: item.quantity,
           priceAtPurchase: product.price,
+          note: item.note || null, // Memindahkan note ke riwayat pembelian
           productSnapshot: JSON.stringify({
             name: product.name,
-            image: product.imageUrl,
+            image: item.image || product.imageUrl,
             sku: product.sku || '-',
             variant: item.selectedVariants || null 
           })
@@ -199,7 +201,21 @@ class OrderController {
         for (const item of order.items) {
            const product = await Product.findByPk(item.ProductId, { transaction: t });
            if (product) await product.update({ stock: product.stock + item.quantity }, { transaction: t });
-           // Restore Variant logic...
+           
+           if (item.productSnapshot) {
+            try {
+              const snapshot = JSON.parse(item.productSnapshot);
+              if (snapshot.variant) {
+                for (const [category, value] of Object.entries(snapshot.variant)) {
+                  const variant = await ProductVariant.findOne({
+                    where: { ProductId: item.ProductId, category, value },
+                    transaction: t
+                  });
+                  if (variant) await variant.update({ stock: variant.stock + item.quantity }, { transaction: t });
+                }
+              }
+            } catch (e) { console.error(e); }
+          }
         }
         await order.update({ status: 'CANCELLED' }, { transaction: t });
         count++;

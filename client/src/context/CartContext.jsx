@@ -61,19 +61,20 @@ export const CartProvider = ({ children }) => {
     const maxStock = existingItem ? (existingItem.stock || 999) : (product.stock || 999);
     const finalQty = Math.min(currentQty + qtyToAdd, maxStock);
 
-    // Optimistic Update
+    // Optimistic Update (Tambahkan juga note di sini agar UI langsung update)
     setCartItems((prevItems) => {
       if (existingItem) {
         return prevItems.map(item => 
           (item.id === product.id && (item.rawVariantId === product.rawVariantId))
-          ? { ...item, quantity: finalQty }
+          ? { ...item, quantity: finalQty, note: product.note !== undefined ? product.note : item.note }
           : item
         );
       } else {
         return [...prevItems, { 
            ...product, 
            quantity: finalQty,
-           cartId: `temp-${Date.now()}` 
+           cartId: `temp-${Date.now()}`,
+           note: product.note || "" // Set note untuk item baru
         }];
       }
     });
@@ -84,10 +85,14 @@ export const CartProvider = ({ children }) => {
         id: product.id,
         quantity: finalQty,
         selectedVariants: product.selectedVariants,
-        rawVariantId: product.rawVariantId
+        rawVariantId: product.rawVariantId,
+        note: product.note // <--- FIX: Payload note sekarang dikirim ke backend!
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      // (Opsional tapi disarankan) Refresh cart di background untuk mendapatkan ID Cart yang asli dari DB
+      fetchCart(); 
       return { success: true };
     } catch (err) {
       console.error(err);
@@ -145,12 +150,39 @@ export const CartProvider = ({ children }) => {
             quantity: newQty,
             selectedVariants: targetItem.selectedVariants,
             rawVariantId: targetItem.rawVariantId
+            // note tidak dikirim agar backend tidak me-replace note menjadi undefined
         }, {
             headers: { Authorization: `Bearer ${token}` }
         });
     } catch (err) { 
         console.error(err); 
         setCartItems(prevCart);
+    }
+  };
+
+  // FUNGSI BARU: Untuk mengupdate note dari halaman Cart (onBlur)
+  const updateItemNote = async (cartId, newNote) => {
+    if (!user || user.role !== 'CUSTOMER') return;
+    
+    const targetItem = cartItems.find(i => i.cartId === cartId);
+    if (!targetItem) return;
+
+    // Optimistic Update
+    setCartItems(prev => prev.map(item => item.cartId === cartId ? { ...item, note: newNote } : item));
+
+    try {
+        const token = localStorage.getItem("access_token");
+        await instance.post('/cart/item', {
+            id: targetItem.id,
+            quantity: targetItem.quantity,
+            selectedVariants: targetItem.selectedVariants,
+            rawVariantId: targetItem.rawVariantId,
+            note: newNote // Kirim note terbaru ke backend
+        }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    } catch (err) { 
+        console.error(err); 
     }
   };
 
@@ -170,7 +202,15 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, loadingCart }}>
+    <CartContext.Provider value={{ 
+        cartItems, 
+        addToCart, 
+        removeFromCart, 
+        updateQuantity, 
+        updateItemNote, // Export fungsi baru
+        clearCart, 
+        loadingCart 
+    }}>
       {children}
     </CartContext.Provider>
   );

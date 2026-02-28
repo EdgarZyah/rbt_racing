@@ -1,4 +1,4 @@
-// client/src/components/ProductCard.jsx
+// client/src/components/commons/ProductCard.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
@@ -7,6 +7,9 @@ import { APP_BASE_URL } from '../../api/axios';
 export default function ProductCard({ product }) {
   const [ref, isVisible] = useScrollReveal();
   const [imgError, setImgError] = useState(false);
+
+  // Pastikan mengambil nama kategori dari properti yang benar (Category atau category)
+  const categoryName = product.Category?.name || product.category?.name || "Uncategorized";
 
   return (
     <Link 
@@ -40,16 +43,17 @@ export default function ProductCard({ product }) {
         </div>
       </div>
 
-      <div className="mt-4 flex justify-between items-start px-1">
-        <div>
-          <h3 className="text-[11px] font-black text-black uppercase tracking-tight italic group-hover:underline underline-offset-4">
+      <div className="mt-4 flex justify-between items-start px-1 text-left">
+        <div className="flex-1">
+          <h3 className="text-[11px] font-black text-black uppercase tracking-tight italic group-hover:underline underline-offset-4 leading-tight">
             {product.name}
           </h3>
+          {/* Menampilkan kategori dengan benar */}
           <p className="mt-1 text-[9px] text-zinc-400 italic font-bold uppercase tracking-widest">
-            {product.category || 'Racing Series'}
+            {categoryName}
           </p>
         </div>
-        <p className="text-[11px] font-black tracking-tighter italic">
+        <p className="text-[11px] font-black tracking-tighter italic ml-4 whitespace-nowrap">
           Rp {product.price?.toLocaleString('id-ID')}
         </p>
       </div>

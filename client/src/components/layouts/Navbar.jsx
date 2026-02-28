@@ -11,7 +11,8 @@ export default function Navbar() {
   const { user } = useAuth();
   const { cartItems } = useCart();
   
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  // FIX: Menggunakan length untuk mendapatkan jumlah varian/jenis produk, bukan total kuantitas
+  const totalItems = cartItems.length;
 
   return (
     <nav className="bg-white border-b border-zinc-200 sticky top-0 z-50">
@@ -29,8 +30,10 @@ export default function Navbar() {
 
           {/* Navigation Links */}
           <div className="hidden md:flex space-x-10 text-[11px] font-black uppercase tracking-[0.2em]">
-            <Link to="/product" className="hover:text-zinc-400 transition">Shop</Link>
-            <Link to="/about" className="hover:text-zinc-400 transition">About</Link>
+            <Link to="/#" className="hover:text-zinc-400 transition">Home</Link>
+            <Link to="/product" className="hover:text-zinc-400 transition">Products</Link>
+            <Link to="/about" className="hover:text-zinc-400 transition">About Us</Link>
+            <Link to="/contact" className="hover:text-zinc-400 transition">Contact</Link>
           </div>
 
           {/* User Actions */}

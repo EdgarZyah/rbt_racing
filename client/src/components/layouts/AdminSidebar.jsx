@@ -1,7 +1,7 @@
 // client/src/components/layouts/AdminSidebar.jsx
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Users, Layers, UserCircle, LogOut, Home, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Layers, UserCircle, LogOut, Home, X, Star } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmModal from '../commons/ConfirmModal'; 
 import Notification from '../commons/Notification';
@@ -27,6 +27,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
     { icon: Home, label: "Shop Address", path: "/admin/shop-address" },
     { icon: Package, label: "Products", path: "/admin/products" },
     { icon: Layers, label: "Categories", path: "/admin/categories" },
+    { icon: Star, label: "Testimonies", path: "/admin/testimonies" },
     { icon: Users, label: "User Management", path: "/admin/users" },
     { icon: ShoppingCart, label: "Orders List", path: "/admin/orders" },
   ];
