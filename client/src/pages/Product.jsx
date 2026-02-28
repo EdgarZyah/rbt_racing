@@ -199,7 +199,7 @@ export default function Product() {
             {productsLoading ? (
               <div className="py-32 flex flex-col items-center justify-center text-zinc-300 space-y-4">
                 <Loader2 className="animate-spin" size={32} />
-                <p className="text-[10px] font-black uppercase tracking-widest italic">Syncing Armory...</p>
+                <p className="text-[10px] font-black uppercase tracking-widest italic">Syncing product...</p>
               </div>
             ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-12 sm:gap-x-8 sm:gap-y-16">

@@ -11,6 +11,11 @@ import {
   MessageSquareText,
   Star,
   Upload,
+  // FIX: Icon di bawah ini sebelumnya kurang di-import!
+  Truck,
+  MapPin,
+  User,
+  Phone
 } from "lucide-react";
 import { useOrder } from "../../hooks/useOrder";
 import { useNavigate } from "react-router-dom";
@@ -42,6 +47,9 @@ export default function Order() {
   const filteredOrders = orders.filter(
     (o) => filter === "ALL" || o.status === filter,
   );
+  
+  // Logic Pagination
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage) || 1;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
@@ -78,7 +86,6 @@ export default function Order() {
     return `${base}/${normalizedPath.replace(/^\//, "")}`;
   };
 
-  // FIX: handleImageChange diperbaiki untuk menangkap file pertama
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
 
@@ -234,7 +241,7 @@ export default function Order() {
               key={f}
               onClick={() => {
                 setFilter(f);
-                setCurrentPage(1);
+                setCurrentPage(1); // Reset page saat ganti filter
               }}
               className={`text-[9px] font-black uppercase px-4 py-2 border transition shrink-0 tracking-widest active:scale-95 ${filter === f ? "bg-black text-white border-black shadow-lg" : "bg-white text-zinc-400 border-zinc-100 hover:border-black"}`}
             >
@@ -299,7 +306,7 @@ export default function Order() {
                     )}
                     <button
                       onClick={() => handleOpenDetail(order)}
-                      className="border border-zinc-200 p-2 text-zinc-400"
+                      className="border border-zinc-200 p-2 text-zinc-400 hover:text-black transition"
                     >
                       <Eye size={16} />
                     </button>
@@ -308,6 +315,29 @@ export default function Order() {
               </div>
             ))}
           </div>
+
+          {/* FIX: Pagination Controls */}
+          {filteredOrders.length > itemsPerPage && (
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 text-[10px] font-black uppercase border border-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black hover:text-white transition"
+              >
+                Previous
+              </button>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 text-[10px] font-black uppercase border border-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black hover:text-white transition"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </>
       ) : (
         <div className="text-center py-20 border border-dashed border-zinc-100 text-zinc-300 text-[10px] font-black uppercase tracking-[0.3em]">
@@ -346,8 +376,15 @@ export default function Order() {
                 </h3>
                 <div className="space-y-4">
                   {selectedOrder.items?.map((item, idx) => {
-                    const snapshot = JSON.parse(item.productSnapshot || "{}");
+                    // FIX: Safe JSON Parsing
+                    let snapshot = {};
+                    try {
+                      snapshot = item.productSnapshot ? JSON.parse(item.productSnapshot) : {};
+                    } catch (e) {
+                      console.error("Error parsing snapshot");
+                    }
                     const imageUrl = getImageUrl(snapshot.image);
+                    
                     return (
                       <div
                         key={idx}
@@ -366,7 +403,7 @@ export default function Order() {
                         </div>
                         <div className="flex-grow text-left">
                           <p className="text-[11px] font-black uppercase tracking-tight">
-                            {snapshot.name}
+                            {snapshot.name || "Unknown Product"}
                           </p>
                           <p className="text-[9px] font-bold text-zinc-400 uppercase italic">
                             {Object.entries(snapshot.variant || {})
@@ -376,7 +413,7 @@ export default function Order() {
                           <p className="text-[10px] font-black mt-1">
                             {item.quantity} x{" "}
                             <span className="text-zinc-400 italic font-medium">
-                              Rp {item.priceAtPurchase.toLocaleString("id-ID")}
+                              Rp {item.priceAtPurchase?.toLocaleString("id-ID")}
                             </span>
                           </p>
                           {item.note && (
@@ -395,7 +432,73 @@ export default function Order() {
                   })}
                 </div>
               </div>
+              
+              {/* Logistics & Payment */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-zinc-50 p-6 text-left">
+                <div className="space-y-3">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                    <Truck size={14} /> Logistics
+                  </h4>
+                  <p className="text-[11px] font-black uppercase">
+                    {selectedOrder.shippingService}
+                  </p>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tight">
+                    Resi:{" "}
+                    <span className="text-black">
+                      {selectedOrder.resi || "NOT ASSIGNED"}
+                    </span>
+                  </p>
+                </div>
 
+                <div className="space-y-3">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                    <MapPin size={14} /> Destination
+                  </h4>
+                  <div className="text-[10px] text-zinc-600 space-y-1">
+                    {(() => {
+                      // FIX: Safe parsing for shipping address
+                      let addr = {};
+                      try {
+                        addr = typeof selectedOrder.shippingAddress === "string"
+                          ? JSON.parse(selectedOrder.shippingAddress)
+                          : selectedOrder.shippingAddress || {};
+                      } catch (e) {
+                        console.error("Failed to parse shipping address");
+                      }
+
+                      return (
+                        <>
+                          <div className="flex items-center gap-1 mb-1">
+                            <User size={10} className="text-black" />
+                            <p className="font-black uppercase text-black">
+                              {addr.receiverName || "Guest"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 mb-2">
+                            <Phone size={10} className="text-black" />
+                            <p className="font-bold">
+                              {addr.phoneNumber || "-"}
+                            </p>
+                          </div>
+                          <p className="leading-relaxed uppercase font-medium border-t border-zinc-200 pt-2">
+                            {addr.fullAddress || "-"}
+                          </p>
+                          <p className="uppercase font-bold text-zinc-500">
+                            {addr.subDistrict}, {addr.district}
+                          </p>
+                          <p className="uppercase font-bold text-zinc-500">
+                            {addr.city}, {addr.province}
+                          </p>
+                          <p className="font-black text-black">
+                            {addr.postalCode}
+                          </p>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+              
               <div className="space-y-3 bg-zinc-50 p-6 border border-zinc-100 shadow-inner text-left">
                 <div className="flex items-center gap-2 mb-4 border-b border-zinc-200 pb-2">
                   <span className="text-[10px] font-black uppercase text-zinc-400 text-left">
@@ -535,7 +638,8 @@ export default function Order() {
               <textarea
                 className="w-full border border-zinc-200 p-4 text-xs focus:outline-none focus:border-black resize-none bg-zinc-50 focus:bg-white text-left text-zinc-800"
                 rows="4"
-                placeholder="Tell us what you loved about ini..."
+                // FIX: Typo dari "ini..."
+                placeholder="Tell us what you loved about this product..."
                 value={reviewForm.comment}
                 onChange={(e) =>
                   setReviewForm((prev) => ({

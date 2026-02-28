@@ -3,11 +3,17 @@ import { X, Truck, MapPin, Store, Loader2, CheckCircle, ArrowRight, Receipt } fr
 import { useShipping } from '../../hooks/useShipping';
 import { useOrder } from '../../hooks/useOrder';
 import { useNavigate } from 'react-router-dom';
+// IMPORT useCart untuk bisa me-reset cart setelah checkout
+import { useCart } from '../../context/CartContext'; 
 
 export default function ShippingModal({ isOpen, onClose, cartItems, userAddress }) {
   const navigate = useNavigate();
   const { calculateShipping, shippingCosts, loadingCost, getShopAddress, shopAddress } = useShipping();
   const { createOrder, loading: loadingOrder } = useOrder();
+  
+  // Ambil fungsi clearCart dari context
+  const { clearCart } = useCart(); 
+  
   const [selectedService, setSelectedService] = useState(null);
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
@@ -42,6 +48,8 @@ export default function ShippingModal({ isOpen, onClose, cartItems, userAddress 
 
     const result = await createOrder(orderPayload);
     if (result.success) {
+      // RESET CART SETELAH BERHASIL CHECKOUT
+      clearCart(); 
       navigate(`/payment`, { state: { orderId: result.data.id } });
       onClose();
     } else {

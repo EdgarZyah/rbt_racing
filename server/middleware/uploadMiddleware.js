@@ -29,7 +29,7 @@ const processImages = async (req, res, next) => {
     // Proses Main Image
     if (req.files['image']) {
       const fileName = `main-${timestamp}.webp`;
-      await sharp(req.files['image'].buffer)
+      await sharp(req.files['image'][0].buffer)
         .resize(800)
         .webp({ quality: 80 })
         .toFile(path.join(uploadPath, fileName));
@@ -93,10 +93,6 @@ const processPaymentProof = async (req, res, next) => {
     res.status(500).json({ message: "Gagal memproses bukti bayar" });
   }
 };
-
-// 4. Processor Gambar Review (KHUSUS REVIEW)
-// server/middleware/uploadMiddleware.js
-
 const processReviewImage = async (req, res, next) => {
   // Jika tidak ada file yang diunggah, lanjut ke controller
   if (!req.file) return next();
@@ -128,5 +124,5 @@ const processReviewImage = async (req, res, next) => {
     res.status(500).json({ message: "Gagal memproses gambar ulasan" });
   }
 };
-// Export semua termasuk processReviewImage
+// Export 'upload' agar bisa dipakai sebagai upload.single()
 module.exports = { upload, uploadFields, processImages, processPaymentProof, processReviewImage };

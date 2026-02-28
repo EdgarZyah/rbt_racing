@@ -314,13 +314,13 @@ export default function Cart() {
             strokeWidth={1.5}
           />
           <p className="text-zinc-400 uppercase text-xs font-bold tracking-widest mb-8">
-            Your armory cache is empty
+            Your cart is empty
           </p>
           <Link
             to="/product"
             className="bg-black text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-zinc-800 transition shadow-lg"
           >
-            Deploy New Gear
+            go to product page
           </Link>
         </div>
       )}
